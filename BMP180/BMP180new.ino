@@ -51,47 +51,13 @@ void loop() {
 
 
     //先に作った配列の中身の和を出して、移動平均を出す。
-    for(int k=0 ; k<5 ; k++){
+    for(int k=i-5 ; k==i ; k++){
       Altsum = Altsum + Alt[k];
       ALT = Altsum/5
     }
 
-    if(i>5 && ALT<TBD) break;　//高度の移動平均が決定地よりも低かったらループを抜け出す
-    //抜け出し方は要検討
-    
-/*  Serial.print("Tem=,");//tempreture
-    Serial.print(bmp.readTemperature());
-    Serial.print(",*C ");
-    
-    Serial.print(",Pre=,");//pressure
-    Serial.print(bmp.readPressure());
-    Serial.print(",Pa ");
-*/   
+    if(i>5 && ALT<TBD) break;　//高度の移動平均が決定地よりも低かったらループを抜け出す 
 
-/* 
-    // Calculate altitude assuming 'standard' barometric
-    // pressure of 1013.25 millibar = 101325 Pascal
-    Serial.print(",Alt=,");//Altitude
-    Serial.print(bmp.readAltitude());
-    Serial.print(",meters ");
-*/
-
-/*
-    Serial.print(",Prs=,");//pressure at sealevel
-    Serial.print(bmp.readSealevelPressure());
-    Serial.print(",Pa ");
-
-  // you can get a more precise measurement of altitude
-  // if you know the current sea level pressure which will
-  // vary with weather and such. If it is 1015 millibars
-  // that is equal to 101500 Pascals.
-    Serial.print(",RAl=,");//Real altitude
-    Serial.print(bmp.readAltitude(101500));
-    Serial.println(",meters");
-
-*/
-    if( i==4) i=0;
-    //iが4に到達したら、i=0を代入し繰り返す。
     }
     
     Serial.println();
