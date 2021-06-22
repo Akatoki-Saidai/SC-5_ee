@@ -1,18 +1,18 @@
-int lauchc = 33;
-int outputsecond = 5;
+int lauchc = 33;            //トランジスタのピン番号の宣言
+int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 
 void setup(){
     //Serial.begin(115200);
-    Serial2.begin(115200);
-    pinMode(lauchc, OUTPUT);
-    digitalWrite(lauchc, LOW);
+    Serial2.begin(115200);          //無線通信用のデータ転送レート
+    pinMode(lauchc, OUTPUT);        //トランジスタの出力宣言
+    digitalWrite(lauchc, LOW);      //トランジスタの出力オフ
     Serial2.write("TESTING: Serial communication\n");
     Serial2.write("TESTING: Serial communication\n");
 }
 
 void loop(){
-    if(Serial2.available()){
-        char key = Serial2.read();
+    if(Serial2.available()){            //無線データに受信があるか
+        char key = Serial2.read();      //受信データの1文字を読み込む
         if(key == 'l'){
 
             Serial2.write("WARNING: The firing code has been entered.\n");
