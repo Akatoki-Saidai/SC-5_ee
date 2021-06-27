@@ -124,10 +124,36 @@ void loop() {
 }
 
 
-void readcommand(){
+char readcommand(){
     // 受信データがあった時だけ、処理を行う
     if (Serial2.available()) {       // 受信データがあるか？
         key = Serial2.read();            // 1文字だけ読み込む
+        switch (key)
+        {
+            case '1':
+                phase = 1;
+                Serial2.write("****** Phase transition command accepted ******\n");
+                break;
+            case '2':
+                phase = 2;
+                Serial2.write("****** Phase transition command accepted ******\n");
+                break;
+            case '3':
+                phase = 3;
+                Serial2.write("****** Phase transition command accepted ******\n");
+                break;
+            case '4':
+                phase = 4;
+                Serial2.write("****** Phase transition command accepted ******\n");
+                break;
+            case '5':
+                phase = 5;
+                Serial2.write("****** Phase transition command accepted ******\n");
+                break;
+
+            default:
+                return key;
+        }
 }
 
 void caculator(){
