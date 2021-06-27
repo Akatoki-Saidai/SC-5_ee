@@ -32,11 +32,15 @@ void loop() {
   uint8_t sensorId;
 
   if (mySensor.magUpdate() == 0) {
-    mX = mySensor.magX();
-    mY = mySensor.magY();
-    mZ = mySensor.magZ();
-    mDirection = mySensor.magHorizDirection();
-
+    
+    //mX=0,mY=0になったらもう一回計測してもらいます
+    //360度表示にするのに不便だからです
+    while(mX==0 && mY==0){
+      mX = mySensor.magX();
+      mY = mySensor.magY();
+      mZ = mySensor.magZ();
+    }
+    
     double tang = mX/mY;  //tanθの値
     double deg = atan(tang); //角度の仮の値
     double degree; //実際の角度がここに入る
