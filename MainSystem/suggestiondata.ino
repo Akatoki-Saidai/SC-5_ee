@@ -3,7 +3,7 @@ int lauchc = 33;            //点火用トランジスタのピン番号の宣�
 int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
-
+char key = '0';
 
 
 void setup() {
@@ -15,6 +15,7 @@ void setup() {
     digitalWrite(cutparac, LOW);    //切り離し用トランジスタの出力オフ
   }
 
+
 void loop() {
 
     if(Serial2.available()){
@@ -22,21 +23,26 @@ void loop() {
 
         switch (key)
         {
-        case 1:
+        case '1':
             phase = 1;
             Serial2.write("****** Phase transition command accepted ******\n");
             break;
-        case 2:
+        case '2':
             phase = 2;
-
-        case 3:
+            Serial2.write("****** Phase transition command accepted ******\n");
+            break;
+        case '3':
             phase = 3;
-        
-        case 4:
+            Serial2.write("****** Phase transition command accepted ******\n");
+            break;
+        case '4':
             phase = 4;
-
-        case 5:
+            Serial2.write("****** Phase transition command accepted ******\n");
+            break;
+        case '5':
             phase = 5;
+            Serial2.write("****** Phase transition command accepted ******\n");
+            break;
 
         default:
             break;
@@ -58,7 +64,18 @@ void loop() {
                 Serial2.write("WARNING: 9v voltage is output.\n");
                 delay(outputcutsecond * 1000);
                 digitalWrite(cutparac, LOW); //オフ
-                
+                Serial2.write("WARNING: 9v voltage is stop.\n");
+                Serial2.write("Phase3: Process all completed. Enter '4' key.\n");
+
+                while(true){
+                    if(Serial2.available()){
+                        key = Serial2.read();
+                        if (key == '4'){
+                            break;
+                        }
+                    }
+                }
+
             case 4: //採取フェーズ
 
             case 5: //発射フェーズ
@@ -110,10 +127,7 @@ void loop() {
 void readcommand(){
     // 受信データがあった時だけ、処理を行う
     if (Serial2.available()) {       // 受信データがあるか？
-        char key = Serial2.read();            // 1文字だけ読み込む
-        Serial2.write(key); // 1文字送信。受信データをそのまま送り返す。
-        Serial.print(key);
-        phase = key ;
+        key = Serial2.read();            // 1文字だけ読み込む
 }
 
 void caculator(){
