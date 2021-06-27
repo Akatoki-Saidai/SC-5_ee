@@ -47,6 +47,23 @@ void loop() {
 
     //値をそのまま使うと-90~90degの範囲でしか表示されない
     // mXの値を使って0~360表示に直したい
+    //mX,mYのどちらかが０のとき
+    if(mX==0){
+      if(mY<0){
+        degree = 90;
+      }else if(mY>0){
+        degree = 270;
+      }
+    }
+
+    if(mY==0){
+      if(mX>0){
+        degree = 0;
+      }else if(mX<0){
+        degree = 180;
+      }
+    }
+    
     if ( tang > 0 ){  
       if ( mX > 0 ){
         degree = deg;
