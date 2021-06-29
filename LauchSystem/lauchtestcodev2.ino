@@ -21,7 +21,7 @@ void setup(){
 void loop(){
     if(Serial2.available()){            //無線データに受信があるか
         char key = Serial2.read();      //受信データの1文字を読み込む
-        if(key == "l"){
+        if(key == 'l'){
             Serial2.write("WARNING: The firing code has been entered.\n");
             Serial2.write("WARNING: Are you sure you want to fire it?\n");
             Serial2.write("WARNING: Press the y key to allow firing.\n");
@@ -60,14 +60,14 @@ void loop(){
         }else if (key == 'm')
         {
             Serial2.write("****** Motor angle determination mode ******\n");
-            Serial2.write("Enter Motor Angle: ")
+            Serial2.write("Enter Motor Angle: ");
             while(true){
                 if (Serial2.available()){
                     String key = Serial2.readStringUntil('\n');
                     Serial2.write(key);
                     Serial2.write("\n");
                     int newAngle = atoi(key.c_str());
-                    if (newAngle != nowAngle){
+                    if (nowAngle != newAngle){
                     if (newAngle <= 180 && newAngle >= 0)
                         {
                         while (pos != newAngle)
