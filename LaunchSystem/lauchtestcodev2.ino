@@ -34,6 +34,13 @@ void loop(){
                     if(key == 'y'){
                         Serial2.write("COUNTDOWN: 3\n");
                         delay(1000);
+                        if(Serial2.available()){            //無線データに受信があるか
+                            char key = Serial2.read();      //受信データの1文字を読み込む
+                            if(key == 'e'){
+                                Serial2.write("");
+                                break;
+                            }
+                        }
                         Serial2.write("COUNTDOWN: 2\n");
                         delay(1000);
                         Serial2.write("COUNTDOWN: 1\n");
@@ -63,34 +70,39 @@ void loop(){
             Serial2.write("Enter Motor Angle: ");
             while(true){
                 if (Serial2.available()){
-                    String key = Serial2.readStringUntil('\n');
-                    Serial2.write(key);
-                    Serial2.write("\n");
+                    String key = Serial2.readStringUntil(';');
                     int newAngle = atoi(key.c_str());
+                    Serial2.write(newAngle);
+                    Serial2.write("\n");
+
                     if (nowAngle != newAngle){
-                    if (newAngle <= 180 && newAngle >= 0)
-                        {
-                        while (pos != newAngle)
-                        {
-                            if (pos < newAngle)
+                        Serial2.write("WARNING: MOTOR IS ROTATING\n");
+                        if (newAngle <= 180 && newAngle >= 0)
                             {
-                            servo.write(pos++);
-                            delay(15);
-                            }
-                            else
+                            while (pos != newAngle)
                             {
-                            servo.write(pos--);
-                            delay(15);
+                                if (pos < newAngle)
+                                {
+                                servo.write(pos++);
+                                delay(15);
+                                }
+                                else
+                                {
+                                servo.write(pos--);
+                                delay(15);
+                                }
+                                Serial.println(pos);
                             }
-                            Serial.println(pos);
+                            }
+                            else{
+                            Serial2.write("WARNING: Out of range");
+                            }
+                        nowAngle = newAngle;
                         }
-                        }
-                        else{
-                        Serial2.Write("WARNING: Out of range");
-                        }
-                    }
+                    break;
                 }
             }
         }
     }
 }
+

@@ -7,6 +7,7 @@ int lauchc = 33;            //トランジスタのピン番号の宣言
 int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 int pos = 0;
 int nowAngle = 0;
+//int stop = 1;
 
 void setup(){
     //Serial.begin(115200);
@@ -68,10 +69,9 @@ void loop(){
             while(true){
                 if (Serial2.available()){
                     String key = Serial2.readStringUntil(';');
-                    chaAngle = key.c_str();
-                    Serial2.write(chaAngle);
+                    Serial2.write(key.c_str());
                     Serial2.write("\n");
-                    int newAngle = atoi(chaAngle);
+                    int newAngle = atoi(key.c_str());
                     if (nowAngle != newAngle){
                         Serial2.write("WARNING: MOTOR IS ROTATING\n");
                         if (newAngle <= 180 && newAngle >= 0)
@@ -111,7 +111,7 @@ void emergency(){
         if(key == 'e'){
             digitalWrite(lauchc, LOW);
             Serial2.write("WARNING: The EMERGENCY code has been entered\n");
-            break;
+//            n = 1;
         }
     }
 }
