@@ -36,13 +36,34 @@ void loop(){
                     if(key == 'y'){
                         Serial2.write("COUNTDOWN: 3\n");
                         delay(1000);
-                        emergency();
+                        if(Serial2.available()){            //無線データに受信があるか
+                            char key = Serial2.read();      //受信データの1文字を読み込む
+                            if(key == 'e'){
+                                digitalWrite(lauchc, LOW);
+                                Serial2.write("WARNING: The EMERGENCY code has been entered\n");
+                                break;
+                            }
+                        }
                         Serial2.write("COUNTDOWN: 2\n");
                         delay(1000);
-                        emergency();
+                        if(Serial2.available()){            //無線データに受信があるか
+                            char key = Serial2.read();      //受信データの1文字を読み込む
+                            if(key == 'e'){
+                                digitalWrite(lauchc, LOW);
+                                Serial2.write("WARNING: The EMERGENCY code has been entered\n");
+                                break;
+                            }
+                        }
                         Serial2.write("COUNTDOWN: 1\n");
                         delay(1000);
-                        emergency();
+                        if(Serial2.available()){            //無線データに受信があるか
+                            char key = Serial2.read();      //受信データの1文字を読み込む
+                            if(key == 'e'){
+                                digitalWrite(lauchc, LOW);
+                                Serial2.write("WARNING: The EMERGENCY code has been entered\n");
+                                break;
+                            }
+                        }
 
                         Serial2.write("LAUCHING: 9V voltage is output.\n");
                         digitalWrite(lauchc, HIGH); //オン
@@ -99,19 +120,6 @@ void loop(){
                     break;
                 }
             }
-        }
-    }
-}
-
-
-
-void emergency(){
-    if(Serial2.available()){            //無線データに受信があるか
-        char key = Serial2.read();      //受信データの1文字を読み込む
-        if(key == 'e'){
-            digitalWrite(lauchc, LOW);
-            Serial2.write("WARNING: The EMERGENCY code has been entered\n");
-//            n = 1;
         }
     }
 }
