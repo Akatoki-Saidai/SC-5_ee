@@ -11,6 +11,7 @@ unsigned long previousMillis = 0;
 bool prelaunch = false;
 int countdown = 3;
 int ignitionstate = 0;
+char key = '0';
 
 void setup(){
     Serial2.begin(115200);          //無線通信用のデータ転送レート
@@ -48,7 +49,7 @@ void loop(){
             Serial2.write("WARNING: Are you sure you want to fire it?\n");
             Serial2.write("WARNING: Press the y key to allow firing.\n");
             prelaunch = true;
-            key = '';
+            key = '0';
 
         case 'm':
             prelaunch = false;
@@ -56,7 +57,8 @@ void loop(){
             Serial2.write("Enter Motor Angle: ");
 
             while(true){
-                if (Serial2.available()){
+                if(Serial2.available()){
+                    
                     String rotation_angle = Serial2.readStringUntil(';');
                     Serial2.write(rotation_angle.c_str());
                     Serial2.write("\n");
@@ -84,7 +86,7 @@ void loop(){
 
             }
             
-            key = '';   
+            key = '0';   
 
         case 'y':
             if(prelaunch){
@@ -95,7 +97,7 @@ void loop(){
                         ignitionstate = 0;
                         countdown = 3;
                         prelaunch = false;
-                        key = '';
+                        key = '0';
                     }
                 }else if(currentMillis - previousMillis >= 1000){
                     char c_countdown = '0' + countdown;
@@ -117,5 +119,5 @@ void loop(){
             digitalWrite(launch_PIN, LOW);
             ignitionstate = 0;
             Serial2.write("WARNING: The EMERGENCY code has been entered\n");
-            key = '';
+            key = '0';
     }
