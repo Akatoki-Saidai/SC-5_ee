@@ -5,6 +5,16 @@ int cutparac = 32;          //切り離し用トランジスタのピン番号�
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
 char key = '0';
 
+//for MPU9250
+#include <MPU9250_asukiaaa.h>
+#ifdef _ESP32_HAL_I2C_H_
+#define SDA_MPU 25
+#define SCL_MPU 26
+#endif
+
+MPU9250_asukiaaa mySensor;
+float aX, aY, aZ, aSqrt;
+
 
 void setup() {
     Serial.begin(115200);
@@ -13,6 +23,22 @@ void setup() {
     pinMode(cutparac, OUTPUT);      //切り離し用トランジスタの出力宣言
     digitalWrite(lauchc, LOW);      //点火用トランジスタの出力オフ
     digitalWrite(cutparac, LOW);    //切り離し用トランジスタの出力オフ
+    
+    //for MPU9250
+    while(!Serial);
+    Serial.println("started");
+    #ifdef _ESP32_HAL_I2C_H_ // For ESP32
+    Wire.begin(SDA_PIN, SCL_PIN);
+    mySensor.setWire(&Wire);
+    #endif
+    mySensor.beginAccel();
+    mySensor.beginGyro();
+    mySensor.beginMag();
+    // You can set your own offset for mag values
+    //Offset値を変える必要あり
+    mySensor.magXOffset = -50;
+    mySensor.magYOffset = -55;
+    mySensor.magZOffset = -10;
   }
 
 
@@ -55,6 +81,26 @@ void loop() {
             case 1: //待機フェーズ
                 Serial2.Write("Phase1: transition completed\n");
                 Serial2.Write("");
+                
+                //フェーズ1  MPU9250使用  機体の傾きを測定
+                Serial.println("You are in the phase 1");
+
+
+                double TBD;       //加速度TBD以上でphase2に移行
+                uint8_t sensorId;
+                if (mySensor.readId(&sensorId) == 0) {
+                    Serial.println("sensorId: " + String(sensorId));
+                } else {
+                    Serial.println("Cannot read sensorId");
+                }
+                while (mySensor.accelUpdate() == 0) {
+                aSqrt = mySensor.accelSqrt();
+
+                if(aSqrt>TBD) break;
+                } else {
+                    Serial.println("Cannod read accel values");
+                }
+                phase = 2;
 
             case 2: //降下フェーズ
 
