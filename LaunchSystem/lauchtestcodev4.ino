@@ -121,3 +121,4 @@ void loop(){
             Serial2.write("WARNING: The EMERGENCY code has been entered\n");
             key = '0';
     }
+}
