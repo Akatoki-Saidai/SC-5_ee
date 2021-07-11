@@ -4,7 +4,7 @@ void setup() {
 
 void loop() {
   for(int n=1 ; n>=0 ; n++){
-    if(n%5==0){
+    if(n%10==0){
       Serial.println("ばかやろう");
       delay(2000);
     }
