@@ -34,7 +34,7 @@ void loop() {
   
   if(Serial.available()){
       char key = Serial.read();
-  
+  }
   
   switch(key){
       
@@ -175,5 +175,4 @@ void loop() {
               break;
       }
        
-  }
 }
