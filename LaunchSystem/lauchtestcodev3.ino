@@ -7,10 +7,9 @@ int lauchc = 33;            //トランジスタのピン番号の宣言
 int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 int pos = 0;
 int nowAngle = 0;
-//int stop = 1;
+unsigned long previousMillis = 0;
 
 void setup(){
-    //Serial.begin(115200);
     Serial2.begin(115200);          //無線通信用のデータ転送レート
     pinMode(lauchc, OUTPUT);        //トランジスタの出力宣言
     digitalWrite(lauchc, LOW);      //トランジスタの出力オフ
@@ -21,6 +20,10 @@ void setup(){
 }
 
 void loop(){
+
+    //Number of milliseconds passed since the program started
+    unsigned long currentMillis = millis(); 
+
     if(Serial2.available()){            //無線データに受信があるか
         char key = Serial2.read();      //受信データの1文字を読み込む
         if(key == 'l'){
