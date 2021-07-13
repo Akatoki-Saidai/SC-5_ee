@@ -67,44 +67,6 @@ void loop(){
             key = '0';
             break;
 
-        // case 'm':
-        //     prelaunch = false;
-        //     Serial2.write("****** Motor angle determination mode ******\n");
-        //     Serial2.write("Enter Motor Angle: ");
-
-        //     while(true){
-        //         if(Serial2.available()){
-        //             String rotation_angle = Serial2.readStringUntil(';');
-        //             Serial2.write(rotation_angle.c_str());
-        //             Serial2.write("\n");
-        //             int newAngle = atoi(rotation_angle.c_str());
-        //             if (nowAngle != newAngle){
-        //                 Serial2.write("WARNING: MOTOR IS ROTATING\n");
-        //                 if (newAngle <= 180 && newAngle >= 0){
-        //                     while (pos != newAngle){
-        //                         if (pos < newAngle){
-        //                             servo.write(pos++);
-        //                             delay(15);
-        //                         }else{
-        //                             servo.write(pos--);
-        //                             delay(15);
-        //                         }
-        //                             Serial2.write(pos);
-        //                     }
-        //                 }else{
-        //                     Serial2.write("WARNING: Out of range");
-        //                 }
-        //                 nowAngle = newAngle;
-        //             }
-        //             break;
-        //         }
-
-        //     }
-            
-        //     key = '0';
-        //     break;   
-
-
         case 'm':
             Serial2.write("****** Servo Motor1 plung angle determination mode ******\n");
             Serial2.write("Enter Motor Angle: ");
