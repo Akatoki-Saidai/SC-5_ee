@@ -3,7 +3,7 @@ int lauchc = 33;            //点火用トランジスタのピン番号の宣�
 int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
-float ms;                   //現在の時間を一時保管
+unsigned long ms;                   //現在の時間を一時保管
 char key = '0';
 
 //for MPU9250
@@ -142,7 +142,7 @@ void loop() {
                 digitalWrite(cutparac, HIGH); //オン
                 Serial2.write("WARNING: 9v voltage is output.\n");
                 ms = millis();
-                while(ms<ms+1){
+                while(millis<ms+1){
                 }
                 digitalWrite(cutparac, LOW); //オフ
                 Serial2.write("WARNING: 9v voltage is stop.\n");
