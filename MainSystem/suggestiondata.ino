@@ -17,7 +17,6 @@ float aX, aY, aZ, aSqrt;
 
 
 void setup() {
-    Serial.begin(115200);
     Serial2.begin(115200);
     pinMode(lauchc, OUTPUT);        //点火用トランジスタの出力宣言
     pinMode(cutparac, OUTPUT);      //切り離し用トランジスタの出力宣言
