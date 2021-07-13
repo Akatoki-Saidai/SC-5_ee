@@ -3,6 +3,7 @@ int lauchc = 33;            //点火用トランジスタのピン番号の宣�
 int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
+float ms;                   //現在の時間を一時保管
 char key = '0';
 
 //for MPU9250
@@ -20,6 +21,9 @@ float aX, aY, aZ, aSqrt;
 Adafruit_BMP085 bmp;
 #define SDA_BMP 21
 #define SCL_BMP 22
+
+//for phase 3
+int cutparac = 32;
 
 void setup() {
     Serial.begin(115200);
@@ -137,7 +141,9 @@ void loop() {
                 Serial2.write("WARNING: The cut-para code has been entered.\n");
                 digitalWrite(cutparac, HIGH); //オン
                 Serial2.write("WARNING: 9v voltage is output.\n");
-                delay(outputcutsecond * 1000);
+                ms = millis();
+                while(ms<ms+1){
+                }
                 digitalWrite(cutparac, LOW); //オフ
                 Serial2.write("WARNING: 9v voltage is stop.\n");
                 Serial2.write("Phase3: Process all completed. Enter '4' key.\n");
