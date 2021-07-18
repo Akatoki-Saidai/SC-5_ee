@@ -232,7 +232,7 @@ void loop() {
                             }
                         }
                     }
-                    Serial.write("******Servo1 finished rotating***** \n");
+                    Serial2.write("******Servo1 finished rotating***** \n");
                     if(nowAngle2 != Angle2){
                         while(pos2 != Angle2){
                             currentMillis = millis();
@@ -244,7 +244,7 @@ void loop() {
                             else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
                                 previousMillis = millis();
                                 servo2.write(pos2--);
-                                Serial.println(pos2);
+                                Serial2.println(pos2);
                             }
                         }
                     }
@@ -303,7 +303,7 @@ void loop() {
                             int newAngle2 = atoi(key.c_str());
                             if (nowAngle2 != newAngle2){
                                 if (newAngle2 <= 180 && newAngle2 >= 0){
-                                    Serial.write("WARMING: MORER1 IS ROTATING \n");
+                                    Serial2.write("WARMING: MORER1 IS ROTATING \n");
                                         while (pos2 != newAngle2){
                                             currentMillis = millis();
                                             if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
