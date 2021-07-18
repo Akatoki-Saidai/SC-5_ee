@@ -1,4 +1,4 @@
-int phase = 0;
+int phase = 1;
 int lauchc = 33;            //点火用トランジスタのピン番号の宣言
 int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言

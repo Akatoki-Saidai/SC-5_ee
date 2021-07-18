@@ -11,6 +11,6 @@ void loop() {
 
     if(Serial2.available()){
         char receivedtext = Serial2.read();
-        Serial.print(receivedtext);
+        Serial.write(receivedtext);
     }
 }
