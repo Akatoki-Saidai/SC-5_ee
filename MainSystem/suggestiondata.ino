@@ -26,7 +26,7 @@ int j=0;
 float gpslat[10];
 float sum_lat;
 float gpslng[10];
-float sum_lng;  
+float sum_lng;
 float GOAL_lat = 35.862857820;
 float GOAL_lng = 139.607681275;
 float v_initial= 38.0;  //[m/s]
@@ -84,7 +84,7 @@ void setup() {
     while(!Serial);
     Serial.println("started");
     #ifdef _ESP32_HAL_I2C_H_ // For ESP32
-    //Wire.begin(SDA_MPU, SCL_MPU);
+    Wire.begin(SDA_MPU, SCL_MPU);
     mySensor.setWire(&Wire);
     #endif
     mySensor.beginAccel();
@@ -96,7 +96,7 @@ void setup() {
     mySensor.magYOffset = -55;
     mySensor.magZOffset = -10;
 
-    
+
     //for GPS
     Serial1.begin(115200, SERIAL_8N1, 5, 18);
 
@@ -108,6 +108,8 @@ void setup() {
     digitalWrite(4, moterstate);
     Serial2.begin(115200);
 
+    //for BMP
+    Wire.begin(SDA_BMP, SCL_BMP);
 
     // Interrupt timer
     volatile int timeCounter1;
@@ -138,11 +140,12 @@ void loop() {
     //センサー値取得
 
     altitude = bmp.readAltitude();
+    accelSqrt = mySensor.accelSqrt();
 
 
     if(Serial1.available()){
         char key = Serial1.read();
-        
+
         //for GPS
         char c = Serial1.read();
         gps.encode(c);
@@ -176,7 +179,7 @@ void loop() {
             }
             else{//10個のデータがたまった後
                   for(j=0;j<9;j++){
-                     gpslat[j]=gpslat[j+1]; 
+                     gpslat[j]=gpslat[j+1];
                      gpslng[j]=gpslng[j+1];
                   }
                   gpslat[9]=gps.location.lat();
@@ -219,26 +222,25 @@ void loop() {
 
 
             //########## 待機フェーズ ##########
-            case 1: 
+            case 1:
 
                 if(!phase_state == 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase1: transition completed\n");
                     Serial2.Write("");
-                    Wire.begin(SDA_MPU, SCL_MPU);
                     phase_state = 1;
                 }
 
                 double TBD;       //加速度TBD以上でphase2に移行
                 uint8_t sensorId;
                 if (mySensor.readId(&sensorId) == 0) {
-                    Serial.println("sensorId: " + String(sensorId));
+                    Serial2.write("sensorId: " + String(sensorId));
+                    Serial2.write("\n");
                 } else {
-                    Serial.println("Cannot read sensorId");
+                    Serial2.Write("Cannot read sensorId\n");
                 }
                 while (mySensor.accelUpdate() == 0) {
-                aSqrt = mySensor.accelSqrt();
-
+                aSqrt = accelSqrt;
                 if(aSqrt>TBD) break;
                 } else {
                     Serial2.Write("Cannod read accel values");
@@ -256,11 +258,10 @@ void loop() {
                     Serial2.Write("Phase2: transition completed\n");
                     Serial2.Write("");
                     phase_state = 2;
+                    Serial2.Write("You are in the phase 2\n");
                 }
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
-                Wire.begin(SDA_BMP, SCL_BMP);
-                Serial2.Write("You are in the phase 2");
                 double Alt[];
                 double Altsum = 0;   //五個のデータの合計値
                 double ALT;          //五個のデータの平均値
@@ -275,7 +276,7 @@ void loop() {
                     }
 
 
-                Serial.println();
+
 
 
 
@@ -319,7 +320,7 @@ void loop() {
                     Serial2.write("");
                     phase_state = 4;
                 }
-                
+
                 phase = 5;
 
 
@@ -369,7 +370,7 @@ void loop() {
                             }
                         }
                         break;
-                    
+
                     case 'e':
                         prelaunch = false;
                         digitalWrite(launch_PIN, LOW);
@@ -527,7 +528,7 @@ void loop() {
         key = '0';
         break;
 
-    
+
     case 'e':
                         prelaunch = false;
                         digitalWrite(launch_PIN, LOW);
