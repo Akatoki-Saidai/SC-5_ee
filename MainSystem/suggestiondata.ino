@@ -80,8 +80,9 @@ void setup() {
 
 void loop() {
     unsigned long currentMillis = millis();
+    altitude = bmp.readAltitude();
     for(int i=0;;i++){     //高度のデータを配列に入れる。
-        Alt[i] = bmp.readAltitude();
+        Alt[i] = altitude;
     }
 
 
@@ -95,11 +96,17 @@ void loop() {
 
     switch (phase)
         {
-            case 1: //待機フェーズ
+
+
+
+
+
+            //########## 待機フェーズ ##########
+            case 1: 
 
                 if(!phase_state == 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.Write("Phase1: transition completed\n");
+                    Serial2.write("Phase1: transition completed\n");
                     Serial2.Write("");
                     Wire.begin(SDA_MPU, SCL_MPU);
                     phase_state = 1;
@@ -121,7 +128,12 @@ void loop() {
                 }
                 phase = 2;
 
-            case 2: //降下フェーズ
+
+
+
+
+            //########## 降下フェーズ ##########
+            case 2:
                 if(!phase_state == 2){
                     //降下フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.Write("Phase2: transition completed\n");
@@ -148,7 +160,13 @@ void loop() {
 
                 Serial.println();
 
-            case 3: //分離フェーズ
+
+
+
+
+
+            //########## 分離フェーズ ##########
+            case 3:
                 if(!phase_state == 3){
                     //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.Write("Phase3: transition completed\n");
@@ -173,151 +191,18 @@ void loop() {
                     }
                 }
 
-            case 4: //採取フェーズ
+
+
+
+            //########## 採取フェーズ ##########
+            case 4:
                 if(!phase_state == 4){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.Write("Phase4: transition completed\n");
                     Serial2.Write("");
                     phase_state = 4;
                 }
-                    switch(key){
-
-                        case 'i':
-                        while(true){
-                            currentMillis = millis();
-                            if((moterstate == LOW) && (currentMillis - previousMillis >= OffTime)){
-                                moterstate = HIGH;
-                                previousMillis = currentMillis;
-                                Serial2.write("Moter start rotating \n");
-                                digitalWrite(4,moterstate);
-                            }
-                            else if((moterstate == HIGH) && (currentMillis - previousMillis >= OnTime)){
-                                moterstate = LOW;
-                                previousMillis = currentMillis;
-                                Serial2.write("Moter finished rotating \n");
-                                digitalWrite(4,moterstate);
-                                break;
-                            }
-                        }
-                        previousMillis = currentMillis;
-                        key = '0';
-                        break;
-
-
-                        case 'j':
-                        if(nowAngle1 != Angle1){
-                        while(pos1 != Angle1){
-                            currentMillis = millis();
-                            if((pos1 < Angle1) && (currentMillis - previousMillis >= interval)) {
-                                previousMillis = millis();
-                                servo1.write(pos1++);
-                                Serial2.println(pos1);
-                            }
-                            else if ((pos1 > Angle1) && (currentMillis - previousMillis >= interval)){
-                                previousMillis = millis();
-                                servo1.write(pos1--);
-                                Serial2.println(pos1);
-                            }
-                        }
-                    }
-                    Serial2.write("******Servo1 finished rotating***** \n");
-                    if(nowAngle2 != Angle2){
-                        while(pos2 != Angle2){
-                            currentMillis = millis();
-                            if((pos2 < Angle2) && (currentMillis - previousMillis >= interval)) {
-                                previousMillis = millis();
-                                servo2.write(pos2++);
-                                Serial2.println(pos2);
-                            }
-                            else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
-                                previousMillis = millis();
-                                servo2.write(pos2--);
-                                Serial2.println(pos2);
-                            }
-                        }
-                    }
-                    Serial2.write("******Servo2 finished rotating*****\n");
-                    nowAngle1 = Angle1;
-                    nowAngle2 = Angle2;
-                    key = '0';
-                    break;
-
-                    case 'm':
-                    Serial2.write("****** Servo Motor1 plung angle determination mode ******\n");
-                    Serial2.write("Enter Motor Angle: ");
-                    while(true){
-                        if (Serial2.available() ){
-                            String key = Serial2.readStringUntil(';');
-                            Serial2.write(key.c_str());
-                            Serial2.write('\n');
-                            int newAngle1 = atoi(key.c_str());
-                            if (nowAngle1 != newAngle1){
-                                if (newAngle1 <= 180 && newAngle1 >= 0){
-                                    Serial2.write("WARMING: MORER1 IS ROTATING \n");
-                                    while (pos1 != newAngle1){
-                                        currentMillis = millis();
-                                        if  ((pos1 < newAngle1) && (currentMillis - previousMillis >= interval)){
-                                            previousMillis = currentMillis;
-                                            servo1.write(pos1++);
-                                            Serial2.println(pos1);
-                                        }
-                                        else if((pos1 > newAngle1) && (currentMillis - previousMillis >= interval)){
-                                            previousMillis = currentMillis;
-                                            servo1.write(pos1--);
-                                            Serial2.println(pos1);
-                                        }
-                                    }
-                                }
-                                else{
-                                    Serial2.write("Warming: Out of the range \n");
-                                }
-                                nowAngle1 = newAngle1;
-                            }
-                            break;
-                        }
-                    }
-                    currentMillis = previousMillis;
-                    key = '0';
-                    break;
-
-                    case 'n':
-                    Serial2.write("****** Servo Motor2 launch angle determination mode ******\n");
-                    Serial2.write("Enter Motor Angle: ");
-                    while(true){
-                        if (Serial2.available()){
-                            String key = Serial2.readStringUntil(';');
-                            Serial2.write(key.c_str());
-                            Serial2.write('\n');
-                            int newAngle2 = atoi(key.c_str());
-                            if (nowAngle2 != newAngle2){
-                                if (newAngle2 <= 180 && newAngle2 >= 0){
-                                    Serial2.write("WARMING: MORER1 IS ROTATING \n");
-                                        while (pos2 != newAngle2){
-                                            currentMillis = millis();
-                                            if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
-                                                previousMillis = currentMillis;
-                                                servo2.write(pos2++);
-                                                Serial2.println(pos2);
-                                            }
-                                            else if ((pos2 > newAngle2) && (currentMillis - previousMillis >= interval)){
-                                                previousMillis = currentMillis;
-                                                servo2.write(pos2--);
-                                                Serial2.println(pos2);
-                                            }
-                                        }
-                                    }
-                                    else{
-                                        Serial2.write("Warming: Out of the range\n");
-                                    }
-                                    nowAngle2 = newAngle2;
-                                }
-                                break;
-                            }
-                        }
-                        currentMillis = previousMillis;
-                        key = '0';
-                        break;
-                    }
+                
                 }
 
                 phase = 5;
@@ -372,4 +257,152 @@ void loop() {
                         }
                     }
 
+
+
+
+
+
+
+    }
+
+
+
+    switch(key){
+
+        case 'i':
+        while(true){
+            currentMillis = millis();
+            if((moterstate == LOW) && (currentMillis - previousMillis >= OffTime)){
+                moterstate = HIGH;
+                previousMillis = currentMillis;
+                Serial2.write("Moter start rotating \n");
+                digitalWrite(4,moterstate);
+            }
+            else if((moterstate == HIGH) && (currentMillis - previousMillis >= OnTime)){
+                moterstate = LOW;
+                previousMillis = currentMillis;
+                Serial2.write("Moter finished rotating \n");
+                digitalWrite(4,moterstate);
+                break;
+            }
+        }
+        previousMillis = currentMillis;
+        key = '0';
+        break;
+
+
+        case 'j':
+        if(nowAngle1 != Angle1){
+        while(pos1 != Angle1){
+            currentMillis = millis();
+            if((pos1 < Angle1) && (currentMillis - previousMillis >= interval)) {
+                previousMillis = millis();
+                servo1.write(pos1++);
+                Serial2.println(pos1);
+            }
+            else if ((pos1 > Angle1) && (currentMillis - previousMillis >= interval)){
+                previousMillis = millis();
+                servo1.write(pos1--);
+                Serial2.println(pos1);
+            }
+        }
+    }
+    Serial2.write("******Servo1 finished rotating***** \n");
+    if(nowAngle2 != Angle2){
+        while(pos2 != Angle2){
+            currentMillis = millis();
+            if((pos2 < Angle2) && (currentMillis - previousMillis >= interval)) {
+                previousMillis = millis();
+                servo2.write(pos2++);
+                Serial2.println(pos2);
+            }
+            else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
+                previousMillis = millis();
+                servo2.write(pos2--);
+                Serial2.println(pos2);
+            }
+        }
+    }
+    Serial2.write("******Servo2 finished rotating*****\n");
+    nowAngle1 = Angle1;
+    nowAngle2 = Angle2;
+    key = '0';
+    break;
+
+    case 'm':
+    Serial2.write("****** Servo Motor1 plung angle determination mode ******\n");
+    Serial2.write("Enter Motor Angle: ");
+    while(true){
+        if (Serial2.available() ){
+            String key = Serial2.readStringUntil(';');
+            Serial2.write(key.c_str());
+            Serial2.write('\n');
+            int newAngle1 = atoi(key.c_str());
+            if (nowAngle1 != newAngle1){
+                if (newAngle1 <= 180 && newAngle1 >= 0){
+                    Serial2.write("WARMING: MORER1 IS ROTATING \n");
+                    while (pos1 != newAngle1){
+                        currentMillis = millis();
+                        if  ((pos1 < newAngle1) && (currentMillis - previousMillis >= interval)){
+                            previousMillis = currentMillis;
+                            servo1.write(pos1++);
+                            Serial2.println(pos1);
+                        }
+                        else if((pos1 > newAngle1) && (currentMillis - previousMillis >= interval)){
+                            previousMillis = currentMillis;
+                            servo1.write(pos1--);
+                            Serial2.println(pos1);
+                        }
+                    }
+                }
+                else{
+                    Serial2.write("Warming: Out of the range \n");
+                }
+                nowAngle1 = newAngle1;
+            }
+            break;
+        }
+    }
+    currentMillis = previousMillis;
+    key = '0';
+    break;
+
+    case 'n':
+    Serial2.write("****** Servo Motor2 launch angle determination mode ******\n");
+    Serial2.write("Enter Motor Angle: ");
+    while(true){
+        if (Serial2.available()){
+            String key = Serial2.readStringUntil(';');
+            Serial2.write(key.c_str());
+            Serial2.write('\n');
+            int newAngle2 = atoi(key.c_str());
+            if (nowAngle2 != newAngle2){
+                if (newAngle2 <= 180 && newAngle2 >= 0){
+                    Serial2.write("WARMING: MORER1 IS ROTATING \n");
+                        while (pos2 != newAngle2){
+                            currentMillis = millis();
+                            if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
+                                previousMillis = currentMillis;
+                                servo2.write(pos2++);
+                                Serial2.println(pos2);
+                            }
+                            else if ((pos2 > newAngle2) && (currentMillis - previousMillis >= interval)){
+                                previousMillis = currentMillis;
+                                servo2.write(pos2--);
+                                Serial2.println(pos2);
+                            }
+                        }
+                    }
+                    else{
+                        Serial2.write("Warming: Out of the range\n");
+                    }
+                    nowAngle2 = newAngle2;
+                }
+                break;
+            }
+        }
+        currentMillis = previousMillis;
+        key = '0';
+        break;
+    }
 }
