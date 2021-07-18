@@ -4,6 +4,7 @@ int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsec
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
 char key = '0';
+int phase_state = 0;
 
 //for MPU9250
 #include <MPU9250_asukiaaa.h>
@@ -80,18 +81,23 @@ void setup() {
 void loop() {
     unsigned long currentMillis = millis();
 
+
     if(Serial2.available()){
         char key = Serial2.read();
+        if((key = '1') || (key == '2') || (key == '3') || (key == '4') || (key == '5')){
+            phase = key;
+        }
     }
 
     switch (phase)
         {
             case 1: //待機フェーズ
-                Serial2.Write("Phase1: transition completed\n");
-                Serial2.Write("");
-                
-                //フェーズ1  MPU9250使用  機体の傾きを測定
-                Serial.println("You are in the phase 1");
+                if(!phase_state == 1){
+                    //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase1: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 1;
+                }
 
 
                 double TBD;       //加速度TBD以上でphase2に移行
@@ -111,6 +117,12 @@ void loop() {
                 phase = 2;
 
             case 2: //降下フェーズ
+                if(!phase_state == 2){
+                    //降下フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase2: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 2;
+                }
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
                 Serial.println("You are in the phase 2");
@@ -135,6 +147,12 @@ void loop() {
                 Serial.println();
 
             case 3: //分離フェーズ
+                if(!phase_state == 3){
+                    //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase3: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 3;
+                }
                 Serial.println("You are in the phase 3");
                 Serial2.write("WARNING: The cut-para code has been entered.\n");
                 digitalWrite(cutparac, HIGH); //オン
@@ -154,10 +172,12 @@ void loop() {
                 }
 
             case 4: //採取フェーズ
-                if(Serial2.available()){
-                    char key = Serial2.read();
-  
-  
+                if(!phase_state == 4){
+                    //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase4: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 4;
+                }
                     switch(key){
       
                         case 'i':
@@ -302,6 +322,12 @@ void loop() {
                 Serial2.write("You are in the phase 4");
                 
             case 5: //発射フェーズ
+                if(!phase_state == 5){
+                    //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase1: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 5;
+                }
                 if(Serial2.available()){            //無線データに受信があるか
                         char key = Serial2.read();      //受信データの1文字を読み込む
                         if(key == 'l'){
