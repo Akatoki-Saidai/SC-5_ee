@@ -104,7 +104,13 @@ void setup() {
 
 
 void loop() {
+
+    //起動時刻の更新
     unsigned long currentMillis = millis();
+
+
+    //センサー値取得
+    
     altitude = bmp.readAltitude();
 
 
@@ -130,10 +136,10 @@ void loop() {
                   distance = 6378.137*pow(10,3)*acos(sin(GPS_lat*2*M_PI/360)*sin(GOAL_lat*2*M_PI/360)+cos(GPS_lat*2*M_PI/360)*cos(GOAL_lat*2*M_PI/360)*cos(delta_lng*2*M_PI/360));
                   angle_radian = asin((distance*g)/pow(v_initial,2.0))/2.0;
                   angle_degree = angle_radian*360.0/(2.0*M_PI);
-                  Serial1.write("LAT:  "); Serial1.write(GPS_lat, 9); Serial1.write("\n");
-                  Serial1.write("LONG: "); Serial1.write(GPS_lng, 9); Serial1.write("\n");
-                  Serial1.write("DISTANCE[m]: "); Serial1.write(distance,9); Serial1.write("\n");
-                  Serial1.write("ANGLE[°]: "); Serial1.write(angle_degree,9); Serial1.write("\n");
+                  Serial.write("LAT:  "); Serial.write(GPS_lat, 9); Serial.write("\n");
+                  Serial.write("LONG: "); Serial.write(GPS_lng, 9); Serial.write("\n");
+                  Serial.write("DISTANCE[m]: "); Serial.write(distance,9); Serial.write("\n");
+                  Serial.write("ANGLE[°]: "); Serial.write(angle_degree,9); Serial.write("\n");
                   n++;
                   i=0;
                   sum_lat=0;
