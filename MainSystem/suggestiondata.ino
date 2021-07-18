@@ -189,12 +189,12 @@ void loop() {
                             if((pos1 < Angle1) && (currentMillis - previousMillis >= interval)) {
                                 previousMillis = millis();
                                 servo1.write(pos1++);
-                                Serial2.println(pos1);
+                                Serial2.write(pos1);
                             }
                             else if ((pos1 > Angle1) && (currentMillis - previousMillis >= interval)){
                                 previousMillis = millis();
                                 servo1.write(pos1--);
-                                Serial2.println(pos1);
+                                Serial2.write(pos1);
                             }
                         }
                     }
@@ -205,12 +205,12 @@ void loop() {
                             if((pos2 < Angle2) && (currentMillis - previousMillis >= interval)) {
                                 previousMillis = millis();
                                 servo2.write(pos2++);
-                                Serial2.println(pos2);
+                                Serial2.write(pos2);
                             }
                             else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
                                 previousMillis = millis();
                                 servo2.write(pos2--);
-                                Serial.println(pos2);
+                                Serial.write(pos2);
                             }
                         }
                     }
@@ -237,12 +237,12 @@ void loop() {
                                         if  ((pos1 < newAngle1) && (currentMillis - previousMillis >= interval)){
                                             previousMillis = currentMillis;
                                             servo1.write(pos1++);
-                                            Serial2.println(pos1);
+                                            Serial2.write(pos1);
                                         }
                                         else if((pos1 > newAngle1) && (currentMillis - previousMillis >= interval)){
                                             previousMillis = currentMillis;
                                             servo1.write(pos1--);
-                                            Serial2.println(pos1);
+                                            Serial2.write(pos1);
                                         }
                                     }
                                 }
@@ -275,12 +275,12 @@ void loop() {
                                             if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
                                                 previousMillis = currentMillis;
                                                 servo2.write(pos2++);
-                                                Serial2.println(pos2);
+                                                Serial2.write(pos2);
                                             }
                                             else if ((pos2 > newAngle2) && (currentMillis - previousMillis >= interval)){
                                                 previousMillis = currentMillis;
                                                 servo2.write(pos2--);
-                                                Serial2.println(pos2);
+                                                Serial2.write(pos2);
                                             }
                                         }
                                     }
