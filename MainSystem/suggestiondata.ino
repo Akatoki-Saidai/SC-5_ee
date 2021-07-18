@@ -56,7 +56,7 @@ void setup() {
     while(!Serial);
     Serial.println("started");
     #ifdef _ESP32_HAL_I2C_H_ // For ESP32
-    Wire.begin(SDA_PIN, SCL_PIN);
+    //Wire.begin(SDA_MPU, SCL_MPU);
     mySensor.setWire(&Wire);
     #endif
     mySensor.beginAccel();
@@ -79,6 +79,10 @@ void setup() {
 
 void loop() {
     unsigned long currentMillis = millis();
+    for(int i=0;;i++){     //高度のデータを配列に入れる。
+        Alt[i] = bmp.readAltitude();
+    }
+
 
     if(Serial2.available()){
         char key = Serial2.read();
@@ -91,7 +95,8 @@ void loop() {
                 Serial2.Write("");
                 
                 //フェーズ1  MPU9250使用  機体の傾きを測定
-                Serial.println("You are in the phase 1");
+                Wire.begin(SDA_MPU, SCL_MPU);
+                Serial2.Write("You are in the phase 1");
 
 
                 double TBD;       //加速度TBD以上でphase2に移行
@@ -106,36 +111,33 @@ void loop() {
 
                 if(aSqrt>TBD) break;
                 } else {
-                    Serial.println("Cannod read accel values");
+                    Serial2.Write("Cannod read accel values");
                 }
                 phase = 2;
 
             case 2: //降下フェーズ
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
-                Serial.println("You are in the phase 2");
+                Wire.begin(SDA_BMP, SCL_BMP);
+                Serial2.Write("You are in the phase 2");
                 double Alt[];
-                double ALT;
-                double TBD;//決めた高度
+                double Altsum = 0;   //五個のデータの合計値
+                double ALT;          //五個のデータの平均値
+                double TBD_h;        //高度TBD
   
                 //高度について、5個のデータの移動平均を出す。
-                for(int i=0;;i++){     //高度のデータを配列に入れる。
-                    Alt[i] = bmp.readAltitude();
-  
-                    double Altsum = 0;   //五個のデータの合計値
-  
+                while(i>5 && ALT<TBD_h){   //高度の移動平均が決定地よりも低かったらループを抜け出す 
                     //先に作った配列の中身の和を出して、移動平均を出す
                     for(int k=i-5 ; k==i ; k++){
                         Altsum = Altsum + Alt[k];
                         ALT = Altsum/5
                     }
-                    if(i>5 && ALT<TBD) break;　//高度の移動平均が決定地よりも低かったらループを抜け出す 
-                }
+                
     
                 Serial.println();
 
             case 3: //分離フェーズ
-                Serial.println("You are in the phase 3");
+                Serial2.Write("You are in the phase 3");
                 Serial2.write("WARNING: The cut-para code has been entered.\n");
                 digitalWrite(cutparac, HIGH); //オン
                 Serial2.write("WARNING: 9v voltage is output.\n");
@@ -198,7 +200,7 @@ void loop() {
                             }
                         }
                     }
-                    Serial.write("******Servo1 finished rotating***** \n");
+                    Serial2.write("******Servo1 finished rotating***** \n");
                     if(nowAngle2 != Angle2){
                         while(pos2 != Angle2){
                             currentMillis = millis();
@@ -210,7 +212,7 @@ void loop() {
                             else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
                                 previousMillis = millis();
                                 servo2.write(pos2--);
-                                Serial.println(pos2);
+                                Serial2.println(pos2);
                             }
                         }
                     }
@@ -269,7 +271,7 @@ void loop() {
                             int newAngle2 = atoi(key.c_str());
                             if (nowAngle2 != newAngle2){
                                 if (newAngle2 <= 180 && newAngle2 >= 0){
-                                    Serial.write("WARMING: MORER1 IS ROTATING \n");
+                                    Serial2.write("WARMING: MORER1 IS ROTATING \n");
                                         while (pos2 != newAngle2){
                                             currentMillis = millis();
                                             if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
