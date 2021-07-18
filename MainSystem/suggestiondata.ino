@@ -81,9 +81,6 @@ void setup() {
 void loop() {
     unsigned long currentMillis = millis();
     altitude = bmp.readAltitude();
-    for(int i=0;;i++){     //高度のデータを配列に入れる。
-        Alt[i] = altitude;
-    }
 
 
 
