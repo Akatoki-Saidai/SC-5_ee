@@ -1,10 +1,18 @@
 int phase = 1;
-int lauchc = 33;            //点火用トランジスタのピン番号の宣言
-int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
+char key = '0';
+
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
-char key = '0';
+
 int phase_state = 0;
+
+int launch_PIN = 33;            //トランジスタのピン番号の宣言
+int launch_outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
+
+bool prelaunch = false;
+int countdown = 3;
+int ignitionstate = false;
+
 
 //for GPS
 #include <TinyGPS++.h>
@@ -100,17 +108,35 @@ void setup() {
     digitalWrite(4, moterstate);
     Serial2.begin(115200);
 
+
+    // Interrupt timer
+    volatile int timeCounter1;
+    hw_timer_t *timer1 = NULL;
+    portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+
+    // Interrupt timer function
+    void IRAM_ATTR onTimer1(){
+    portENTER_CRITICAL_ISR(&timerMux);
+    timeCounter1++;
+    portEXIT_CRITICAL_ISR(&timerMux);
+
   }
 
 
 void loop() {
+    //割り込み関数（適切にサンプリングレートを確立するために）
+    if (timeCounter1 > 0) {
+    portENTER_CRITICAL(&timerMux);
+    timeCounter1--;
+    portEXIT_CRITICAL(&timerMux);
+
 
     //起動時刻の更新
     unsigned long currentMillis = millis();
 
 
     //センサー値取得
-    
+
     altitude = bmp.readAltitude();
 
 
@@ -175,7 +201,7 @@ void loop() {
                   GPS_lng=0;
            }
         }
-
+    }
 
 
     if(Serial2.available()){
@@ -289,68 +315,73 @@ void loop() {
             case 4:
                 if(!phase_state == 4){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.Write("Phase4: transition completed\n");
-                    Serial2.Write("");
+                    Serial2.write("Phase4: transition completed\n");
+                    Serial2.write("");
                     phase_state = 4;
                 }
                 
-                }
-
                 phase = 5;
-                Serial2.write("You are in the phase 4");
 
-            case 5: //発射フェーズ
+
+
+            //########## 発射フェーズ ##########
+            case 5:
                 if(!phase_state == 5){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.Write("Phase1: transition completed\n");
-                    Serial2.Write("");
+                    Serial2.write("Phase5: transition completed\n");
+                    Serial2.write("");
                     phase_state = 5;
                 }
-                if(Serial2.available()){            //無線データに受信があるか
-                        char key = Serial2.read();      //受信データの1文字を読み込む
-                        if(key == 'l'){
 
-                            Serial2.write("WARNING: The firing code has been entered.\n");
-                            Serial2.write("WARNING: Are you sure you want to fire it?\n");
-                            Serial2.write("WARNING: Press the y key to allow firing.\n");
+                switch(key){
 
-                            while(true){
+                    case 'l':
+                        Serial2.write("WARNING: The firing code has been entered.\n");
+                        Serial2.write("WARNING: Are you sure you want to fire it?\n");
+                        Serial2.write("WARNING: Press the y key to allow firing.\n");
+                        prelaunch = true;
+                        key = '0';
+                        break;
 
-                                if(Serial2.available()){
-                                    char key = Serial2.read();
-
-                                    if(key == 'y'){
-                                        Serial2.write("COUNTDOWN: 3\n");
-                                        delay(1000);
-                                        Serial2.write("COUNTDOWN: 2\n");
-                                        delay(1000);
-                                        Serial2.write("COUNTDOWN: 1\n");
-                                        delay(1000);
-
-                                        Serial2.write("LAUCHING: 9V voltage is output.\n");
-                                        digitalWrite(lauchc, HIGH); //オン
-
-                                        delay(outputsecond * 1000);
-
-                                        Serial2.write("LAUCHING: 9V voltage is stop.\n");
-                                        digitalWrite(lauchc, LOW); //オフ
-                                        break;
-                                    }else if (key == 'n'){
-                                        Serial2.write("****** Ignition operation canceled ******\n");
-                                        break;
-                                    }
+                    case 'y':
+                        if(prelaunch){
+                            if(ignitionstate){
+                                if(currentMillis - previousMillis >= launch_outputsecond * 1000){
+                                    Serial2.write("LAUCHING: 9V voltage is stop.\n");
+                                    digitalWrite(launch_PIN, LOW); //オフ
+                                    ignitionstate = 0;
+                                    countdown = 3;
+                                    prelaunch = false;
+                                    key = '0';
                                 }
+                            }else if(currentMillis - previousMillis >= 1000){
+                                char c_countdown = '0' + countdown;
+                                Serial2.write("COUNTDOWN: ");
+                                Serial2.write(c_countdown);
+                                Serial2.write("\n");
+                                --countdown;
+                                if(countdown+1<=0){
+                                    Serial2.write("LAUCHING: 9V voltage is output.\n");
+                                    digitalWrite(launch_PIN, HIGH); //オン
+                                    ignitionstate = true;
+                                }
+                                previousMillis = currentMillis;
                             }
-                        }else if (key == 'e') //緊急停止用
-                        {
-                            digitalWrite(lauchc, LOW);
-                            Serial2.write("WARNING: The EMERGENCY code has been entered\n");
                         }
-                    }
+                        break;
+                    
+                    case 'e':
+                        prelaunch = false;
+                        digitalWrite(launch_PIN, LOW);
+                        ignitionstate = 0;
+                        countdown = 3;
+                        Serial2.write("WARNING: The EMERGENCY code has been entered\n");
+                        key = '0';
+                        break;
 
-
-
-
+                    default:
+                        break;
+                }
 
 
 
@@ -389,12 +420,12 @@ void loop() {
             if((pos1 < Angle1) && (currentMillis - previousMillis >= interval)) {
                 previousMillis = millis();
                 servo1.write(pos1++);
-                Serial2.println(pos1);
+                Serial2.write(pos1);
             }
             else if ((pos1 > Angle1) && (currentMillis - previousMillis >= interval)){
                 previousMillis = millis();
                 servo1.write(pos1--);
-                Serial2.println(pos1);
+                Serial2.write(pos1);
             }
         }
     }
@@ -405,12 +436,12 @@ void loop() {
             if((pos2 < Angle2) && (currentMillis - previousMillis >= interval)) {
                 previousMillis = millis();
                 servo2.write(pos2++);
-                Serial2.println(pos2);
+                Serial2.write(pos2);
             }
             else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
                 previousMillis = millis();
                 servo2.write(pos2--);
-                Serial2.println(pos2);
+                Serial2.write(pos2);
             }
         }
     }
@@ -437,12 +468,12 @@ void loop() {
                         if  ((pos1 < newAngle1) && (currentMillis - previousMillis >= interval)){
                             previousMillis = currentMillis;
                             servo1.write(pos1++);
-                            Serial2.println(pos1);
+                            Serial2.write(pos1);
                         }
                         else if((pos1 > newAngle1) && (currentMillis - previousMillis >= interval)){
                             previousMillis = currentMillis;
                             servo1.write(pos1--);
-                            Serial2.println(pos1);
+                            Serial2.write(pos1);
                         }
                     }
                 }
@@ -475,12 +506,12 @@ void loop() {
                             if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
                                 previousMillis = currentMillis;
                                 servo2.write(pos2++);
-                                Serial2.println(pos2);
+                                Serial2.write(pos2);
                             }
                             else if ((pos2 > newAngle2) && (currentMillis - previousMillis >= interval)){
                                 previousMillis = currentMillis;
                                 servo2.write(pos2--);
-                                Serial2.println(pos2);
+                                Serial2.write(pos2);
                             }
                         }
                     }
@@ -495,5 +526,17 @@ void loop() {
         currentMillis = previousMillis;
         key = '0';
         break;
+
+    
+    case 'e':
+                        prelaunch = false;
+                        digitalWrite(launch_PIN, LOW);
+                        ignitionstate = 0;
+                        countdown = 3;
+                        Serial2.write("WARNING: The EMERGENCY code has been entered\n");
+                        key = '0';
+                        break;
+
+    }
     }
 }
