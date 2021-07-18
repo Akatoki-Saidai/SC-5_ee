@@ -80,10 +80,7 @@ void setup() {
 
 void loop() {
     unsigned long currentMillis = millis();
-    altitude = bmp.readAltitude();
-    for(int i=0;;i++){     //高度のデータを配列に入れる。
-        Alt[i] = altitude;
-    }
+    double Altitude = bmp.readAltitude();   //高度のデータ
 
 
 
@@ -117,14 +114,14 @@ void loop() {
                 if (mySensor.readId(&sensorId) == 0) {
                     Serial.println("sensorId: " + String(sensorId));
                 } else {
-                    Serial.println("Cannot read sensorId");
+                    Serial2.Write("Cannot read sensorId\n");
                 }
                 while (mySensor.accelUpdate() == 0) {
                 aSqrt = mySensor.accelSqrt();
 
                 if(aSqrt>TBD) break;
                 } else {
-                    Serial2.Write("Cannod read accel values");
+                    Serial2.Write("Cannod read accel values\n");
                 }
                 phase = 2;
 
@@ -143,22 +140,24 @@ void loop() {
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
                 Wire.begin(SDA_BMP, SCL_BMP);
-                Serial2.Write("You are in the phase 2");
+                Serial2.Write("You are in the phase 2\n");
                 double Alt[];
                 double Altsum = 0;   //五個のデータの合計値
                 double ALT;          //五個のデータの平均値
                 double TBD_h;        //高度TBD
 
                 //高度について、5個のデータの移動平均を出す。
+
+                for(int i=0;;i++){  //高度のデータを配列に入れる。//高度の移動平均が決定地よりも低かったらループを抜け出す 
+                    Altitude = Alt[i];
+
                 while(i>5 && ALT<TBD_h){   //高度の移動平均が決定地よりも低かったらループを抜け出す
+
                     //先に作った配列の中身の和を出して、移動平均を出す
                     for(int k=i-5 ; k==i ; k++){
                         Altsum = Altsum + Alt[k];
                         ALT = Altsum/5
                     }
-
-
-                Serial.println();
 
 
 
@@ -194,6 +193,7 @@ void loop() {
 
 
 
+
             //########## 採取フェーズ ##########
             case 4:
                 if(!phase_state == 4){
@@ -203,11 +203,17 @@ void loop() {
                     phase_state = 4;
                 }
                 
-                }
-
                 phase = 5;
                 Serial2.write("You are in the phase 4");
 
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+            //########## 発射フェーズ ##########
             case 5: //発射フェーズ
                 if(!phase_state == 5){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
@@ -256,9 +262,6 @@ void loop() {
                             Serial2.write("WARNING: The EMERGENCY code has been entered\n");
                         }
                     }
-
-
-
 
 
 
@@ -406,3 +409,4 @@ void loop() {
         break;
     }
 }
+
