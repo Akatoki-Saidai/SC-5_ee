@@ -117,7 +117,7 @@ void loop() {
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
                 Serial.println("You are in the phase 2");
-                double Alt[5];
+                double Alt[];
                 double ALT;
                 double TBD;//決めた高度
   
