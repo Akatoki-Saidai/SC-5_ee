@@ -74,12 +74,6 @@ void setup() {
     pinMode(4,OUTPUT);
     digitalWrite(4, moterstate);
     Serial2.begin(115200);
-  
-    //for BMP180
-    if (!bmp.begin()) {
-        Serial.println("Could not find a valid BMP085 sensor, check wiring!");
-        while (1) {}
-    }
   }
 
 
@@ -88,35 +82,7 @@ void loop() {
 
     if(Serial2.available()){
         char key = Serial2.read();
-
-        switch (key)
-        {
-        case '1':
-            phase = 1;
-            Serial2.write("****** Phase transition command accepted ******\n");
-            break;
-        case '2':
-            phase = 2;
-            Serial2.write("****** Phase transition command accepted ******\n");
-            break;
-        case '3':
-            phase = 3;
-            Serial2.write("****** Phase transition command accepted ******\n");
-            break;
-        case '4':
-            phase = 4;
-            Serial2.write("****** Phase transition command accepted ******\n");
-            break;
-        case '5':
-            phase = 5;
-            Serial2.write("****** Phase transition command accepted ******\n");
-            break;
-
-        default:
-            break;
-        }
     }
-
 
     switch (phase)
         {
@@ -378,41 +344,4 @@ void loop() {
                         }
                     }
 
-}
-
-
-char readcommand(){
-    // 受信データがあった時だけ、処理を行う
-    if (Serial2.available()) {       // 受信データがあるか？
-        key = Serial2.read();            // 1文字だけ読み込む
-        switch (key)
-        {
-            case '1':
-                phase = 1;
-                Serial2.write("****** Phase transition command accepted ******\n");
-                break;
-            case '2':
-                phase = 2;
-                Serial2.write("****** Phase transition command accepted ******\n");
-                break;
-            case '3':
-                phase = 3;
-                Serial2.write("****** Phase transition command accepted ******\n");
-                break;
-            case '4':
-                phase = 4;
-                Serial2.write("****** Phase transition command accepted ******\n");
-                break;
-            case '5':
-                phase = 5;
-                Serial2.write("****** Phase transition command accepted ******\n");
-                break;
-
-            default:
-                return key;
-        }
-}
-
-void caculator(){
-    
 }
