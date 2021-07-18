@@ -90,7 +90,7 @@ void setup() {
 
     
     //for GPS
-    Serial2.begin(115200, SERIAL_8N1, 5, 18);
+    Serial1.begin(115200, SERIAL_8N1, 5, 18);
 
 
     //for servomoter
@@ -108,11 +108,11 @@ void loop() {
     altitude = bmp.readAltitude();
 
 
-    if(Serial2.available()){
-        char key = Serial2.read();
+    if(Serial1.available()){
+        char key = Serial1.read();
         
         //for GPS
-        char c = Serial2.read();
+        char c = Serial1.read();
         gps.encode(c);
         if (gps.location.isUpdated()) {
            if(n==0){//10個のデータがたまるまで
@@ -130,10 +130,10 @@ void loop() {
                   distance = 6378.137*pow(10,3)*acos(sin(GPS_lat*2*M_PI/360)*sin(GOAL_lat*2*M_PI/360)+cos(GPS_lat*2*M_PI/360)*cos(GOAL_lat*2*M_PI/360)*cos(delta_lng*2*M_PI/360));
                   angle_radian = asin((distance*g)/pow(v_initial,2.0))/2.0;
                   angle_degree = angle_radian*360.0/(2.0*M_PI);
-                  Serial2.write("LAT:  "); Serial2.write(GPS_lat, 9); Serial2.write("\n");
-                  Serial2.write("LONG: "); Serial2.write(GPS_lng, 9); Serial2.write("\n");
-                  Serial2.write("DISTANCE[m]: "); Serial2.write(distance,9); Serial2.write("\n");
-                  Serial2.write("ANGLE[°]: "); Serial2.write(angle_degree,9); Serial2.write("\n");
+                  Serial1.write("LAT:  "); Serial1.write(GPS_lat, 9); Serial1.write("\n");
+                  Serial1.write("LONG: "); Serial1.write(GPS_lng, 9); Serial1.write("\n");
+                  Serial1.write("DISTANCE[m]: "); Serial1.write(distance,9); Serial1.write("\n");
+                  Serial1.write("ANGLE[°]: "); Serial1.write(angle_degree,9); Serial1.write("\n");
                   n++;
                   i=0;
                   sum_lat=0;
@@ -159,10 +159,10 @@ void loop() {
                   distance = 6378.137*pow(10,3)*acos(sin(GPS_lat*2*M_PI/360)*sin(GOAL_lat*2*M_PI/360)+cos(GPS_lat*2*M_PI/360)*cos(GOAL_lat*2*M_PI/360)*cos(delta_lng*2*M_PI/360));
                   angle_radian = asin((distance*g)/pow(v_initial,2.0))/2.0;
                   angle_degree = angle_radian*360.0/(2.0*M_PI);
-                  Serial2.write("LAT:  "); Serial2.write(GPS_lat, 9); Serial2.write("\n");
-                  Serial2.write("LONG: "); Serial2.write(GPS_lng, 9); Serial2.write("\n");
-                  Serial2.write("DISTANCE[m]: "); Serial2.write(distance,9); Serial2.write("\n");
-                  Serial2.write("ANGLE[°]: "); Serial2.write(angle_degree,9); Serial2.write("\n");
+                  Serial1.write("LAT:  "); Serial1.write(GPS_lat, 9); Serial1.write("\n");
+                  Serial1.write("LONG: "); Serial1.write(GPS_lng, 9); Serial1.write("\n");
+                  Serial1.write("DISTANCE[m]: "); Serial1.write(distance,9); Serial1.write("\n");
+                  Serial1.write("ANGLE[°]: "); Serial1.write(angle_degree,9); Serial1.write("\n");
                   sum_lat=0;
                   GPS_lat=0;
                   sum_lng=0;
