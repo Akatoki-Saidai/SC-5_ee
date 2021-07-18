@@ -4,6 +4,7 @@ int outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsec
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
 char key = '0';
+int phase_state = 0;
 
 //for MPU9250
 #include <MPU9250_asukiaaa.h>
@@ -56,7 +57,7 @@ void setup() {
     while(!Serial);
     Serial.println("started");
     #ifdef _ESP32_HAL_I2C_H_ // For ESP32
-    //Wire.begin(SDA_MPU, SCL_MPU);
+    Wire.begin(SDA_PIN, SCL_PIN);
     mySensor.setWire(&Wire);
     #endif
     mySensor.beginAccel();
@@ -79,24 +80,24 @@ void setup() {
 
 void loop() {
     unsigned long currentMillis = millis();
-    for(int i=0;;i++){     //高度のデータを配列に入れる。
-        Alt[i] = bmp.readAltitude();
-    }
 
 
     if(Serial2.available()){
         char key = Serial2.read();
+        if((key = '1') || (key == '2') || (key == '3') || (key == '4') || (key == '5')){
+            phase = key;
+        }
     }
 
     switch (phase)
         {
             case 1: //待機フェーズ
-                Serial2.Write("Phase1: transition completed\n");
-                Serial2.Write("");
-                
-                //フェーズ1  MPU9250使用  機体の傾きを測定
-                Wire.begin(SDA_MPU, SCL_MPU);
-                Serial2.Write("You are in the phase 1");
+                if(!phase_state == 1){
+                    //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase1: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 1;
+                }
 
 
                 double TBD;       //加速度TBD以上でphase2に移行
@@ -111,33 +112,48 @@ void loop() {
 
                 if(aSqrt>TBD) break;
                 } else {
-                    Serial2.Write("Cannod read accel values");
+                    Serial.println("Cannod read accel values");
                 }
                 phase = 2;
 
             case 2: //降下フェーズ
+                if(!phase_state == 2){
+                    //降下フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase2: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 2;
+                }
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
-                Wire.begin(SDA_BMP, SCL_BMP);
-                Serial2.Write("You are in the phase 2");
+                Serial.println("You are in the phase 2");
                 double Alt[];
-                double Altsum = 0;   //五個のデータの合計値
-                double ALT;          //五個のデータの平均値
-                double TBD_h;        //高度TBD
+                double ALT;
+                double TBD;//決めた高度
   
                 //高度について、5個のデータの移動平均を出す。
-                while(i>5 && ALT<TBD_h){   //高度の移動平均が決定地よりも低かったらループを抜け出す 
+                for(int i=0;;i++){     //高度のデータを配列に入れる。
+                    Alt[i] = bmp.readAltitude();
+  
+                    double Altsum = 0;   //五個のデータの合計値
+  
                     //先に作った配列の中身の和を出して、移動平均を出す
                     for(int k=i-5 ; k==i ; k++){
                         Altsum = Altsum + Alt[k];
                         ALT = Altsum/5
                     }
-                
+                    if(i>5 && ALT<TBD) break;　//高度の移動平均が決定地よりも低かったらループを抜け出す 
+                }
     
                 Serial.println();
 
             case 3: //分離フェーズ
-                Serial2.Write("You are in the phase 3");
+                if(!phase_state == 3){
+                    //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase3: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 3;
+                }
+                Serial.println("You are in the phase 3");
                 Serial2.write("WARNING: The cut-para code has been entered.\n");
                 digitalWrite(cutparac, HIGH); //オン
                 Serial2.write("WARNING: 9v voltage is output.\n");
@@ -156,10 +172,12 @@ void loop() {
                 }
 
             case 4: //採取フェーズ
-                if(Serial2.available()){
-                    char key = Serial2.read();
-  
-  
+                if(!phase_state == 4){
+                    //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase4: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 4;
+                }
                     switch(key){
       
                         case 'i':
@@ -200,7 +218,7 @@ void loop() {
                             }
                         }
                     }
-                    Serial2.write("******Servo1 finished rotating***** \n");
+                    Serial.write("******Servo1 finished rotating***** \n");
                     if(nowAngle2 != Angle2){
                         while(pos2 != Angle2){
                             currentMillis = millis();
@@ -212,7 +230,7 @@ void loop() {
                             else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
                                 previousMillis = millis();
                                 servo2.write(pos2--);
-                                Serial2.println(pos2);
+                                Serial.println(pos2);
                             }
                         }
                     }
@@ -271,7 +289,7 @@ void loop() {
                             int newAngle2 = atoi(key.c_str());
                             if (nowAngle2 != newAngle2){
                                 if (newAngle2 <= 180 && newAngle2 >= 0){
-                                    Serial2.write("WARMING: MORER1 IS ROTATING \n");
+                                    Serial.write("WARMING: MORER1 IS ROTATING \n");
                                         while (pos2 != newAngle2){
                                             currentMillis = millis();
                                             if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
@@ -304,6 +322,12 @@ void loop() {
                 Serial2.write("You are in the phase 4");
                 
             case 5: //発射フェーズ
+                if(!phase_state == 5){
+                    //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.Write("Phase1: transition completed\n");
+                    Serial2.Write("");
+                    phase_state = 5;
+                }
                 if(Serial2.available()){            //無線データに受信があるか
                         char key = Serial2.read();      //受信データの1文字を読み込む
                         if(key == 'l'){
