@@ -79,7 +79,7 @@ void setup() {
 
 void loop() {
     unsigned long currentMillis = millis();
-    unsigned long Altitude = bmp.readAltitude();   //高度のデータ
+    double Altitude = bmp.readAltitude();   //高度のデータ
     
     
 
