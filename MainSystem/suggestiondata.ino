@@ -82,7 +82,7 @@ void setup() {
 
     //for MPU9250
     while(!Serial);
-    Serial.println("started");
+    Serial2.Write("started\n");
     #ifdef _ESP32_HAL_I2C_H_ // For ESP32
     Wire.begin(SDA_MPU, SCL_MPU);
     mySensor.setWire(&Wire);
