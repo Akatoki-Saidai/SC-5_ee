@@ -541,3 +541,21 @@ void loop() {
     }
     }
 }
+
+int t_caculator(distance_,v_initial_){
+    theta = atan(power(initial_,2)/(g*distance_) + sqrt(power()))
+}
+
+
+
+// 64bitデータのバイナリー変換
+void casttobyte(int64_t data, byte buf[]){
+    buf[0] = (data >> 56) & 0x00FF;
+    buf[1] = (data >> 48) & 0x00FF;
+    buf[2] = (data >> 40) & 0x00FF;
+    buf[3] = (data >> 32) & 0x00FF;
+    buf[4] = (data >> 24) & 0x00FF;
+    buf[5] = (data >> 16) & 0x00FF;
+    buf[6] = (data >> 8) & 0x00FF;
+    buf[7] = (data) & 0x00FF;
+}
