@@ -36,8 +36,8 @@ float delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
 //for MPU9250
 #include <MPU9250_asukiaaa.h>
 #ifdef _ESP32_HAL_I2C_H_
-#define SDA_MPU 25
-#define SCL_MPU 26
+#define SDA_MPU 21
+#define SCL_MPU 22
 #endif
 
 MPU9250_asukiaaa mySensor;
@@ -140,6 +140,9 @@ void loop() {
     //センサー値取得
 
     altitude = bmp.readAltitude();
+    aX = mySensor.aX();
+    aY = mySensor.aY();
+    aZ = mySensor.aZ();
     accelSqrt = mySensor.accelSqrt();
 
 
@@ -227,11 +230,11 @@ void loop() {
                 if(!phase_state == 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase1: transition completed\n");
-                    Serial2.Write("");
                     phase_state = 1;
+                    Serial2.write("YOU ARE IN THE PHASE 1\n");
+                    double TBD ;       //加速度TBD（ここに代入）以上でphase2に移行
                 }
-
-                double TBD;       //加速度TBD以上でphase2に移行
+            
                 uint8_t sensorId;
                 if (mySensor.readId(&sensorId) == 0) {
                     Serial2.write("sensorId: " + String(sensorId));
@@ -256,9 +259,9 @@ void loop() {
                 if(!phase_state == 2){
                     //降下フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.Write("Phase2: transition completed\n");
-                    Serial2.Write("");
                     phase_state = 2;
-                    Serial2.Write("You are in the phase 2\n");
+                    Serial2.Write("YOU ARE IN THE PHASE 2\n");
+                    int i = 0;
                 }
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
@@ -274,6 +277,7 @@ void loop() {
                         Altsum = Altsum + Alt[k];
                         ALT = Altsum/5
                     }
+                i = i + 1;
 
 
 
@@ -288,7 +292,7 @@ void loop() {
                 if(!phase_state == 3){
                     //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.Write("Phase3: transition completed\n");
-                    Serial2.Write("");
+                    Serial2.Write("YOU ARE IN THE PHASE 3\n");
                     phase_state = 3;
                 }
 
