@@ -246,7 +246,7 @@ void loop() {
                 aSqrt = accelSqrt;
                 if(aSqrt>TBD) break;
                 } else {
-                    Serial2.Write("Cannod read accel values");
+                    Serial2.Write("Cannot read accel values");
                 }
                 phase = 2;
 
