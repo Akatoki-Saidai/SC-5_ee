@@ -293,10 +293,10 @@ void loop() {
                     Serial2.Write("Phase3: transition completed\n");
                     Serial2.Write("");
                     phase_state = 3;
-                    3time = gps_time;                           //phase3　開始時間の保存
+                    3time = currentMillis;                           //phase3　開始時間の保存
                     St_Time = 3time + outputcutsecond * 1000;   //基準時間
                 }
-                3_1time = gps_time;
+                3_1time = currentMillis;
 
                 Serial2.write("WARNING: The cut-para code has been entered.\n");
                 digitalWrite(cutparac, HIGH); //オン
