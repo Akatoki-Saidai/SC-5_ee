@@ -261,7 +261,7 @@ void loop() {
                     Serial2.Write("Phase2: transition completed\n");
                     Serial2.Write("");
                     phase_state = 2;
-                    Serial2.Write("You are in the phase 2\n");
+                    
                 }
 
                 //フェーズ2  BMP180使用  加速度の移動平均を測定
@@ -293,22 +293,20 @@ void loop() {
                     Serial2.Write("Phase3: transition completed\n");
                     Serial2.Write("");
                     phase_state = 3;
+                    3time = gps_time;                           //phase3　開始時間の保存
+                    St_Time = 3time + outputcutsecond * 1000;   //基準時間
                 }
+                3_1time = gps_time;
 
                 Serial2.write("WARNING: The cut-para code has been entered.\n");
                 digitalWrite(cutparac, HIGH); //オン
                 Serial2.write("WARNING: 9v voltage is output.\n");
-                delay(outputcutsecond * 1000);
-                digitalWrite(cutparac, LOW); //オフ
-                Serial2.write("WARNING: 9v voltage is stop.\n");
-                Serial2.write("Phase3: Process all completed. Enter '4' key.\n");
-
-                while(true){
-                    if(Serial2.available()){
-                        key = Serial2.read();
-                        if (key == '4'){
-                            break;
-                        }
+                if(3_1time > StTime){
+                    digitalWrite(cutparac, LOW); //オフ
+                    Serial2.write("WARNING: 9v voltage is stop.\n");
+                    Serial2.write("Phase3: Process all completed. Enter '4' key.\n");    //追加質問　これいる？
+                    if (){          //条件をうまく適応する方法を今考えてる （加速度の変化が止まったらにしようかなって）
+                        phase = 4;
                     }
                 }
 
