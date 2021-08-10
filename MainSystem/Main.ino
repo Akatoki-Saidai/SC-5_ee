@@ -72,7 +72,16 @@ Adafruit_BMP085 bmp;
 #define SDA_BMP 21
 #define SCL_BMP 22
 
+//for SD Card
+#include <SPI.h>
+#include <SD.h>
 
+
+File myFile;
+const int sck=13 , miso=15 , mosi=14 , ss=27; 
+
+
+// Interrupt timer function
 void IRAM_ATTR onTimer1(){
     portENTER_CRITICAL_ISR(&timerMux);
     timeCounter1++;
@@ -80,19 +89,22 @@ void IRAM_ATTR onTimer1(){
 }
 
 void setup() {
+    // SD Card initialization
+    SPI.begin(sck,miso,mosi,ss);
+    SD.begin(ss,SPI);
+    CanSatLogData = SD.open("/CanSatLogData.log", FILE_APPEND);
+    SensorData = SD.open("/SensorData.bin",FILE_APPEND);
+
+    //無線通信
     Serial2.begin(115200);
+
+    //LED
     pinMode(lauchc, OUTPUT);        //点火用トランジスタの出力宣言
     pinMode(cutparac, OUTPUT);      //切り離し用トランジスタの出力宣言
     digitalWrite(lauchc, LOW);      //点火用トランジスタの出力オフ
     digitalWrite(cutparac, LOW);    //切り離し用トランジスタの出力オフ
 
     //for MPU9250
-    while(!Serial);
-    Serial2.Write("started\n");
-    #ifdef _ESP32_HAL_I2C_H_ // For ESP32
-    Wire.begin(SDA_MPU, SCL_MPU);
-    mySensor.setWire(&Wire);
-    #endif
     mySensor.beginAccel();
     mySensor.beginGyro();
     mySensor.beginMag();
@@ -122,9 +134,7 @@ void setup() {
     hw_timer_t *timer1 = NULL;
     portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
-
     
-
   }
 
 
@@ -141,72 +151,25 @@ void loop() {
 
 
     //センサー値取得
+    gps.location.isUpdated();
+    mySensor.accelUpdate();
+    mySensor.gyroUpdate();
+    char c = Serial2.read();
+    gps.encode(c);
 
-    altitude = bmp.readAltitude();
-    accelSqrt = mySensor.accelSqrt();
+    Temperature = bme.readTemperature()
+    Pressure = bme.readPressure()
+    Humidity = bme.readHumidity();
+    accelX = mySensor.accelX();
+    accelY = mySensor.accelY();
+    accelZ = mySensor.accelZ();
+    gyroX = mySensor.gyroX();
+    gyroY = mySensor.gyroY();
+    gyroZ = mySensor.gyroZ();
+    gps_latitude = gps.location.lat();
+    gps_longitude = gps.location.lng()
+    gps_time = gps.time.value();
 
-
-    if(Serial1.available()){
-        char key = Serial1.read();
-
-        //for GPS
-        char c = Serial1.read();
-        gps.encode(c);
-        if (gps.location.isUpdated()) {
-           if(n==0){//10個のデータがたまるまで
-              gpslat[i] = gps.location.lat();
-              gpslng[i] = gps.location.lng();
-              i++;
-              if(i==10){
-                  for(j=0;j<10;j++){
-                     sum_lat = sum_lat + gpslat[j];
-                     sum_lng = sum_lng + gpslng[j];
-                  }
-                  GPS_lat=sum_lat/10;
-                  GPS_lng=sum_lng/10;
-                  delta_lng=GOAL_lng-GPS_lng;
-                  distance = 6378.137*pow(10,3)*acos(sin(GPS_lat*2*M_PI/360)*sin(GOAL_lat*2*M_PI/360)+cos(GPS_lat*2*M_PI/360)*cos(GOAL_lat*2*M_PI/360)*cos(delta_lng*2*M_PI/360));
-                  angle_radian = asin((distance*g)/pow(v_initial,2.0))/2.0;
-                  angle_degree = angle_radian*360.0/(2.0*M_PI);
-                  Serial.write("LAT:  "); Serial.write(GPS_lat, 9); Serial.write("\n");
-                  Serial.write("LONG: "); Serial.write(GPS_lng, 9); Serial.write("\n");
-                  Serial.write("DISTANCE[m]: "); Serial.write(distance,9); Serial.write("\n");
-                  Serial.write("ANGLE[°]: "); Serial.write(angle_degree,9); Serial.write("\n");
-                  n++;
-                  i=0;
-                  sum_lat=0;
-                  GPS_lat=0;
-                  sum_lng=0;
-                  GPS_lng=0;
-              }
-            }
-            else{//10個のデータがたまった後
-                  for(j=0;j<9;j++){
-                     gpslat[j]=gpslat[j+1];
-                     gpslng[j]=gpslng[j+1];
-                  }
-                  gpslat[9]=gps.location.lat();
-                  gpslng[9]=gps.location.lng();
-                  for(j=0;j<10;j++){
-                     sum_lat = sum_lat + gpslat[j];
-                     sum_lng = sum_lng + gpslng[j];
-                  }
-                  GPS_lat=sum_lat/10;
-                  GPS_lng=sum_lng/10;
-                  delta_lng=GOAL_lng-GPS_lng;
-                  distance = 6378.137*pow(10,3)*acos(sin(GPS_lat*2*M_PI/360)*sin(GOAL_lat*2*M_PI/360)+cos(GPS_lat*2*M_PI/360)*cos(GOAL_lat*2*M_PI/360)*cos(delta_lng*2*M_PI/360));
-                  angle_radian = asin((distance*g)/pow(v_initial,2.0))/2.0;
-                  angle_degree = angle_radian*360.0/(2.0*M_PI);
-                  Serial1.write("LAT:  "); Serial1.write(GPS_lat, 9); Serial1.write("\n");
-                  Serial1.write("LONG: "); Serial1.write(GPS_lng, 9); Serial1.write("\n");
-                  Serial1.write("DISTANCE[m]: "); Serial1.write(distance,9); Serial1.write("\n");
-                  Serial1.write("ANGLE[°]: "); Serial1.write(angle_degree,9); Serial1.write("\n");
-                  sum_lat=0;
-                  GPS_lat=0;
-                  sum_lng=0;
-                  GPS_lng=0;
-           }
-        }
     }
 
 
@@ -388,9 +351,7 @@ void loop() {
                 }
 
 
-
     }
-
 
 
     switch(key){
@@ -543,12 +504,30 @@ void loop() {
 
     }
     }
+
+
+    //SDカードへデータを保存する
+
+    // switch (phase){
+    //     case 1:
+    //     case 2:
+    //     case 3:
+        
+
+
+
+    //     case 4:
+    //     case 5:
+    // }
+
+    
+
 }
+
 
 int t_caculator(distance_,v_initial_){
     theta = atan(power(initial_,2)/(g*distance_) + sqrt(power()))
 }
-
 
 
 // 64bit整数データのバイナリー変換
