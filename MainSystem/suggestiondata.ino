@@ -1,5 +1,6 @@
 int phase = 1;
 char key = '0';
+int type = 1;               //phase 3で使用
 
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
