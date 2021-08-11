@@ -7,7 +7,7 @@
   int type_state = 1;
   }
 
-  swich(type)
+ swich(type){
 
   case 1:
 
@@ -64,3 +64,4 @@
       phase = 4;
     }
   }
+ }
