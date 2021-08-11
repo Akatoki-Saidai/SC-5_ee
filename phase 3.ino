@@ -26,7 +26,7 @@
   if(3_1time > StTime){
   digitalWrite(cutparac, LOW); //オフ
   Serial2.write("WARNING: 9v voltage is stop.\n");
-  phase = 4;
+  type = 2;
   }
 
 
