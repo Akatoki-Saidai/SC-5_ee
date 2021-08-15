@@ -61,11 +61,12 @@ int Angle1 = 30;
 int Angle2 = 15;
 int increment = 1;
 unsigned long previousMillis = 0;
-unsigned long OnTime = 30000;
-unsigned long OffTime = 250;
+unsigned long OnTime = 3000;
+unsigned long OffTime = 5000;
 int moterstate = LOW;
 int interval = 30;
 int servophase = 6;
+int moter_end = 0;
 
 unsigned long time3, St_Time;
 
@@ -340,7 +341,7 @@ void loop() {
                     phase_state = 4;
                 }
 
-                if((moterstate == LOW) && (currentMillis - previousMillis >= OffTime)){
+                if((moterstate == LOW) && (moter_end == 0) && (currentMillis - previousMillis >= OffTime)){
 
                     moterstate = HIGH;
                     previousMillis = currentMillis;
@@ -350,7 +351,7 @@ void loop() {
                     CanSatLogData.flush();
                     digitalWrite(4,moterstate);
 
-                }else if((moterstate == HIGH) && (currentMillis - previousMillis >= OnTime)){
+                }else if((moterstate == HIGH) && (moter_end == 0) && (currentMillis - previousMillis >= OnTime)){
                     moterstate = LOW;
                     previousMillis = currentMillis;
                     Serial2.write("Moter finished rotating \n");
@@ -358,9 +359,11 @@ void loop() {
                     CanSatLogData.write("\tMotor finished rotating\n");
                     CanSatLogData.flush();
                     digitalWrite(4,moterstate);
-                    phase = 5;
+                    moter_end = 1;
                 }
-
+                else if((moterstate == LOW) && (moter_end == 1) && (currentMillis - previousMillis >= OffTime)){
+                    previousMillis = currentMillis;
+                    phase = 5;
                 break;
 
 
