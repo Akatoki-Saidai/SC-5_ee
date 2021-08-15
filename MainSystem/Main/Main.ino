@@ -16,6 +16,15 @@ int ignitionstate = false;
 int64_t sensorValue_bin[14];
 int Datanumber = 0;
 
+//phase3で使用する変数
+float aX, aY, aZ, aSqrt;
+int type_state = 1;
+int type = 1;
+float accelsqrt,accel;
+float time3_1,St_Time;
+float Accel[100000];           //計測した値を全ておいておく関数
+float Preac,differ,Acsum,Acave,RealDiffer;
+
 //for GPS
 #include <TinyGPS++.h>
 #include <math.h>
@@ -305,27 +314,77 @@ void loop() {
             case 3:
                 if(!phase_state == 3){
                     //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.write("Phase3: transition completed\n");
-                    CanSatLogData.write(gps_time);
-                    CanSatLogData.write("\tPhase3: transition completed\n");
-                    CanSatLogData.flush();
-                    time3 = currentMillis; //phase3　開始時間の保存
-                    St_Time = time3 + outputcutsecond * 1000;   //基準時間
+                    Serial2.Write("Phase3: transition completed\n");
+                    Serial2.Write("");
                     phase_state = 3;
+                    St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
+                    time3_1 = currentMillis;                           //phase3　開始時間の保存
+                    
+                    Serial2.write("WARNING: The cut-para code has been entered.\n");
+                    digitalWrite(cutparac, HIGH); //オン
+                    Serial2.write("WARNING: 9v voltage is output.\n");
                 }
+                    
+                
+                switch(type){
+                case 1:
+                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く              
+                        Serial2.Write("Phase3_type1: transition completed\n");
+                        Serial2.Write("");
+                        type_state = 2;
 
-                if(currentMillis > St_Time){
-                    digitalWrite(cutparac, LOW); //オフ
-                    Serial2.write("WARNING: 9v voltage is stop.\n");
-                    if (true){          //条件をうまく適応する方法を今考えてる （加速度の変化が止まったらにしようかなって）
-                        phase = 4;
+                        Serial2.Write("WARNING: The cut-para code has been entered.\n");
+                        digitalWrite(cutparac, HIGH); //オン
+                        Serial2.Write("WARNING: 9v voltage is output.\n");
+                    }
+ 
+                    if(time3_1 > St_Time){     //電流を流した時間が基準時間を超えたら 
+                        digitalWrite(cutparac, LOW); //オフ
+                        Serial2.Write("WARNING: 9v voltage is stop.\n");
+                        type = 2;
+                    }
+
+
+                case 2:
+                    if (mySensor.accelUpdate() == 0) {
+                        aX = mySensor.accelX();
+                        aY = mySensor.accelY();
+                        aZ = mySensor.accelZ();
+                        accelsqrt = mySensor.accelSqrt();
+                        if(!type_state == 2){　　//停止フェーズに入ったとき１回だけ実行したいプログラムを書く
+                            Serial2.Write("Phase3_type2: transition completed\n");
+                            Serial2.Write("");
+                            type_state = 3;
+                            i = 0;
+                            j = 0;
+                            Preac = 0;      //1秒前の加速度を記憶
+                            differ = 0.1;   //移動平均の差
+                        }
+
+                        accel = accelsqrt;
+                        Acsum = 0;         //加速度5個の合計値
+                        Acave = 0;         //加速度5個の平均値
+                        RealDiffer = 0;    //1秒前との差を記憶する
+
+                        if (i < 5){          
+                            Accel[i] = accel;
+                            i = i + 1;
+                        }else{          //データが五個集まったとき
+                            Accel[i] = accel;
+                            for(j=i-4 ; j==i ; j++){
+                            Acsum = Acsum + Accel[j];
+                            i = i + 1;
+                            }
+                            Acave = Acsum / 5;
+                            RealDiffer = Preac - Acave;
+                            if( RealDiffer < differ ){ //移動平均が基準以内の変化量だった時
+                                type = 3;
+                                phase = 4;
+                            }
+                        Preac = Acave;    //次のループでは今のデータと比較する
+                        }
                     }
                 }
-
-
-
-
-                break;
 
 
 
