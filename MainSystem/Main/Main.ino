@@ -267,7 +267,9 @@ void loop() {
                 if(!phase_state == 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase1: transition completed\n");
-                    Serial2.write("");
+                    CanSatLogData.write(gps_time);
+                    CanSatLogData.write("\tPhase1: transition completed\n");
+                    CanSatLogData.flush();
                     phase_state = 1;
                 }
                                 
@@ -285,9 +287,10 @@ void loop() {
                 if(!phase_state == 2){
                     //降下フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase2: transition completed\n");
-                    Serial2.write("");
+                    CanSatLogData.write(gps_time);
+                    CanSatLogData.write("\tPhase2: transition completed\n");
+                    CanSatLogData.flush();
                     phase_state = 2;
-                    Serial2.write("You are in the phase 2\n");
                 }
 
 
@@ -302,7 +305,9 @@ void loop() {
                 if(!phase_state == 3){
                     //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase3: transition completed\n");
-
+                    CanSatLogData.write(gps_time);
+                    CanSatLogData.write("\tPhase3: transition completed\n");
+                    CanSatLogData.flush();
                     time3 = currentMillis; //phase3　開始時間の保存
                     St_Time = time3 + outputcutsecond * 1000;   //基準時間
                     phase_state = 3;
@@ -329,7 +334,9 @@ void loop() {
                 if(!phase_state == 4){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase4: transition completed\n");
-                    Serial2.write("");
+                    CanSatLogData.write(gps_time);
+                    CanSatLogData.write("\tPhase4: transition completed\n");
+                    CanSatLogData.flush();
                     phase_state = 4;
                 }
 
@@ -338,12 +345,18 @@ void loop() {
                     moterstate = HIGH;
                     previousMillis = currentMillis;
                     Serial2.write("Moter start rotating \n");
+                    CanSatLogData.write(gps_time);
+                    CanSatLogData.write("\tMotor start rotating\n");
+                    CanSatLogData.flush();
                     digitalWrite(4,moterstate);
 
                 }else if((moterstate == HIGH) && (currentMillis - previousMillis >= OnTime)){
                     moterstate = LOW;
                     previousMillis = currentMillis;
                     Serial2.write("Moter finished rotating \n");
+                    CanSatLogData.write(gps_time);
+                    CanSatLogData.write("\tMotor finished rotating\n");
+                    CanSatLogData.flush();
                     digitalWrite(4,moterstate);
                     phase = 5;
                 }
@@ -358,7 +371,9 @@ void loop() {
                 if(!phase_state == 5){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase5: transition completed\n");
-                    Serial2.write("");
+                    CanSatLogData.write(gps_time);
+                    CanSatLogData.write("\tPhase5: transition completed\n");
+                    CanSatLogData.flush();
                     phase_state = 5;
                 }
 
@@ -381,7 +396,10 @@ void loop() {
                             nowAngle1 = pos1;
                         }else if(nowAngle1 == Angle1){
                             Serial2.write("******Servo1 finished rotating***** \n");
-                            servophase = 6;
+                            CanSatLogData.write(gps_time);
+                            CanSatLogData.write("\tServo1 finished rotating\n");
+                            CanSatLogData.flush();
+                            servophase = 7;
                             }
                         break;
 
@@ -403,7 +421,10 @@ void loop() {
                             nowAngle2 = pos2;
                         }else if(nowAngle2 == Angle2){
                             Serial2.write("******Servo2 finished rotating***** \n");
-                            servophase = 7;
+                            CanSatLogData.write(gps_time);
+                            CanSatLogData.write("\tServo2 finished rotating\n");
+                            CanSatLogData.flush();
+                            servophase = 8;
                         }
                         
                         break;
@@ -415,7 +436,7 @@ void loop() {
 
         }//フェーズ関数閉じ
 
-
+        
 
 
         //無線通信による指示switch関数
@@ -559,13 +580,13 @@ void loop() {
 
 
         case 'e':
-                            prelaunch = false;
-                            digitalWrite(launch_PIN, LOW);
-                            ignitionstate = 0;
-                            countdown = 3;
-                            Serial2.write("WARNING: The EMERGENCY code has been entered\n");
-                            key = '0';
-                            break;
+            prelaunch = false;
+            digitalWrite(launch_PIN, LOW);
+            ignitionstate = 0;
+            countdown = 3;
+            Serial2.write("WARNING: The EMERGENCY code has been entered\n");
+            key = '0';
+            break;
 
         }//無線通信による指示switch関数閉じ
 
