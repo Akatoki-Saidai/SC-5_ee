@@ -204,6 +204,7 @@ void setup() {
 
     int sensorData_d[10];
 
+    CanSatLogData.println("START RECORD");
 
 }//setup関数閉じ
 
