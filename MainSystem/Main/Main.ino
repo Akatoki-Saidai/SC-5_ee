@@ -95,7 +95,7 @@ File SensorData;
 const int sck=13 , miso=15 , mosi=14 , ss=27;
 
 //センサー値の格納
-double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude;
+double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude, altitude;
 int gps_time;
 
 
@@ -235,6 +235,7 @@ void loop() {
         gyroX = mySensor.gyroX();
         gyroY = mySensor.gyroY();
         gyroZ = mySensor.gyroZ();
+        altitude = bmp.readAltitude();
         accelSqrt = mySensor.accelSqrt();
 
         // GPSデータの更新をするかどうか
@@ -290,8 +291,8 @@ void loop() {
                 if(!phase_state == 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase1: transition completed\n");
-                    CanSatLogData.write(gps_time);
-                    CanSatLogData.write("\tPhase1: transition completed\n");
+                    CanSatLogData.print(gps_time);
+                    CanSatLogData.print("\tPhase1: transition completed\n");
                     CanSatLogData.flush();
                     phase_state = 1;
                 }
@@ -333,8 +334,8 @@ void loop() {
                 if(!phase_state == 2){
                     //降下フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase2: transition completed\n");
-                    CanSatLogData.write(gps_time);
-                    CanSatLogData.write("\tPhase2: transition completed\n");
+                    CanSatLogData.print(gps_time);
+                    CanSatLogData.print("\tPhase2: transition completed\n");
                     CanSatLogData.flush();
                     phase_state = 2;
                 }
@@ -455,8 +456,8 @@ void loop() {
                 if(!phase_state == 4){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase4: transition completed\n");
-                    CanSatLogData.write(gps_time);
-                    CanSatLogData.write("\tPhase4: transition completed\n");
+                    CanSatLogData.print(gps_time);
+                    CanSatLogData.print("\tPhase4: transition completed\n");
                     CanSatLogData.flush();
                     phase_state = 4;
                 }
@@ -466,8 +467,8 @@ void loop() {
                     moterstate = HIGH;
                     previousMillis = currentMillis;
                     Serial2.write("Moter start rotating \n");
-                    CanSatLogData.write(gps_time);
-                    CanSatLogData.write("\tMotor start rotating\n");
+                    CanSatLogData.print(gps_time);
+                    CanSatLogData.print("\tMotor start rotating\n");
                     CanSatLogData.flush();
                     digitalWrite(4,moterstate);
 
@@ -475,8 +476,8 @@ void loop() {
                     moterstate = LOW;
                     previousMillis = currentMillis;
                     Serial2.write("Moter finished rotating \n");
-                    CanSatLogData.write(gps_time);
-                    CanSatLogData.write("\tMotor finished rotating\n");
+                    CanSatLogData.print(gps_time);
+                    CanSatLogData.print("\tMotor finished rotating\n");
                     CanSatLogData.flush();
                     digitalWrite(4,moterstate);
                     moter_end = 1;
@@ -494,8 +495,8 @@ void loop() {
                 if(!phase_state == 5){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase5: transition completed\n");
-                    CanSatLogData.write(gps_time);
-                    CanSatLogData.write("\tPhase5: transition completed\n");
+                    CanSatLogData.print(gps_time);
+                    CanSatLogData.print("\tPhase5: transition completed\n");
                     CanSatLogData.flush();
                     phase_state = 5;
                 }
@@ -519,8 +520,8 @@ void loop() {
                             nowAngle1 = pos1;
                         }else if(nowAngle1 == Angle1){
                             Serial2.write("******Servo1 finished rotating***** \n");
-                            CanSatLogData.write(gps_time);
-                            CanSatLogData.write("\tServo1 finished rotating\n");
+                            CanSatLogData.print(gps_time);
+                            CanSatLogData.print("\tServo1 finished rotating\n");
                             CanSatLogData.flush();
                             servophase = 7;
                             }
@@ -544,8 +545,8 @@ void loop() {
                             nowAngle2 = pos2;
                         }else if(nowAngle2 == Angle2){
                             Serial2.write("******Servo2 finished rotating***** \n");
-                            CanSatLogData.write(gps_time);
-                            CanSatLogData.write("\tServo2 finished rotating\n");
+                            CanSatLogData.print(gps_time);
+                            CanSatLogData.print("\tServo2 finished rotating\n");
                             CanSatLogData.flush();
                             servophase = 8;
                         }
