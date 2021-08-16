@@ -9,9 +9,9 @@ int phase_state = 0;
 int launch_PIN = 33;            //トランジスタのピン番号の宣言
 int launch_outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
 
-bool prelaunch = false;
+bool prelaunch = true;
 int countdown = 3;
-int ignitionstate = false;
+int ignitionstate = true;
 
 int64_t sensorValue_bin[14];
 int Datanumber = 0;
