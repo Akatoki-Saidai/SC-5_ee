@@ -92,7 +92,7 @@ Adafruit_BMP085 bmp;
 File CanSatLogData;
 File SensorData;
 
-const int sck=13 , miso=15 , mosi=14 , ss=27; 
+const int sck=13 , miso=15 , mosi=14 , ss=27;
 
 //センサー値の格納
 double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude;
@@ -248,7 +248,7 @@ void loop() {
 
         }
 
-        
+
         //地上局からのフェーズ指示
         if(Serial2.available()){
 
@@ -262,7 +262,7 @@ void loop() {
                 case '2':
                     phase = 2;
                     break;
-                
+
                 case '3':
                     phase = 3;
                     break;
@@ -270,7 +270,7 @@ void loop() {
                 case '4':
                     phase = 4;
                     break;
-                
+
                 case '5':
                     phase = 5;
                     break;
@@ -278,7 +278,7 @@ void loop() {
         }//地上局からのフェーズ指示閉じ
 
 
-    
+
 
 
         //各フェーズごとの記述
@@ -286,7 +286,7 @@ void loop() {
 
             //########## 待機フェーズ ##########
             case 1:
-            
+
                 if(!phase_state == 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase1: transition completed\n");
@@ -295,7 +295,7 @@ void loop() {
                     CanSatLogData.flush();
                     phase_state = 1;
                 }
-               
+
                 if(accelSqrt >= 0.1 && accelSqrt <= 0.2 ) //最高点に来たら
                 {
                     if(mode_average1==0){//5個のデータがたまるまで
@@ -324,8 +324,8 @@ void loop() {
                     Serial.write("MPU DOESN'T OPERATE. SKIP PHASE 2.\n");
                     phase = 3;
                 }*/
-                                
-                
+
+
                 break;
 
             //########## 降下フェーズ ##########
@@ -338,7 +338,7 @@ void loop() {
                     CanSatLogData.flush();
                     phase_state = 2;
                 }
-                
+
                 if(altitude_average>TBD_h)
                 {
                   if(mode_average2==0){//5個のデータがたまるまで
@@ -380,16 +380,16 @@ void loop() {
                     phase_state = 3;
                     St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
                     time3_1 = currentMillis;                           //phase3　開始時間の保存
-                    
+
                     Serial2.write("WARNING: The cut-para code has been entered.\n");
                     digitalWrite(cutparac, HIGH); //オン
                     Serial2.write("WARNING: 9v voltage is output.\n");
                 }
-                    
-                
+
+
                 switch(type){
                 case 1:
-                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く              
+                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
                         Serial2.Write("Phase3_type1: transition completed\n");
                         Serial2.Write("");
                         type_state = 2;
@@ -398,8 +398,8 @@ void loop() {
                         digitalWrite(cutparac, HIGH); //オン
                         Serial2.Write("WARNING: 9v voltage is output.\n");
                     }
- 
-                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら 
+
+                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
                         digitalWrite(cutparac, LOW); //オフ
                         Serial2.Write("WARNING: 9v voltage is stop.\n");
                         type = 2;
@@ -427,7 +427,7 @@ void loop() {
                         Acave = 0;         //加速度5個の平均値
                         RealDiffer = 0;    //1秒前との差を記憶する
 
-                        if (i < 5){          
+                        if (i < 5){
                             Accel[i] = accel;
                             i = i + 1;
                         }else{          //データが五個集まったとき
@@ -549,7 +549,7 @@ void loop() {
                             CanSatLogData.flush();
                             servophase = 8;
                         }
-                        
+
                         break;
 
                 break;
@@ -559,7 +559,7 @@ void loop() {
 
         }//フェーズ関数閉じ
 
-        
+
 
 
         //無線通信による指示switch関数
