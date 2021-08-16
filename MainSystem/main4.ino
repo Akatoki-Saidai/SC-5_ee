@@ -25,13 +25,6 @@ float Accel[6];           //計測した値をおいておく関数
 
 
 float Preac,differ,Acsum,Acave,RealDiffer;
-
-//for GPS
-#include <TinyGPS++.h>
-#include <math.h>
-
-TinyGPSPlus gps;
-
 int i=0;
 int n=0;
 int j=0;
@@ -75,15 +68,6 @@ int moterstate = LOW;
 int interval = 30;
 int servophase = 6;
 int moter_end = 0;
-
-
-
-//for BMP180
-#include <Wire.h> //I2C通信
-#include <Adafruit_BMP085.h>
-Adafruit_BMP085 bmp;
-#define SDA_BMP 21
-#define SCL_BMP 22
 
 //for SD Card
 #include <SPI.h> //SDカードはSPI通信
@@ -185,11 +169,6 @@ void setup() {
     mySensor.magYOffset = -55;
     mySensor.magZOffset = -10;
 
-
-    //for GPS
-    Serial1.begin(115200, SERIAL_8N1, 5, 18); //関数内の引数はデータ通信レート,わからん,RXピンTXピン
-
-
     //for servomoter
     servo1.init(23,0);
     servo2.init(19,1);
@@ -235,8 +214,6 @@ void loop() {
 
 
         //センサー値取得
-        Temperature = bmp.readTemperature();
-        Pressure = bmp.readPressure();
         accelX = mySensor.accelX();
         accelY = mySensor.accelY();
         accelZ = mySensor.accelZ();
@@ -248,17 +225,6 @@ void loop() {
         gyroZ = mySensor.gyroZ();
         altitude = bmp.readAltitude();
         accelSqrt = mySensor.accelSqrt();
-
-        // GPSデータの更新をするかどうか
-        if(gps.location.isUpdated()){   //アップデートの実行
-            char c = Serial1.read();    //GPSチップからのデータを受信
-            gps.encode(c);              //GPSチップからのデータの整形
-
-            gps_latitude = gps.location.lat();
-            gps_longitude = gps.location.lng();
-            gps_time = gps.time.value();
-
-        }
 
 
         //地上局からのフェーズ指示
@@ -716,8 +682,8 @@ void loop() {
   
 
         //SDカードへデータを保存する
-        sensorValue_bin[0] = Temperature * 1000;
-        sensorValue_bin[1] = Pressure * 1000;
+        sensorValue_bin[0] = 0;
+        sensorValue_bin[1] = 0;
         sensorValue_bin[2] = accelX * 1000;
         sensorValue_bin[3] = accelY * 1000;
         sensorValue_bin[4] = accelZ * 1000;
@@ -727,8 +693,8 @@ void loop() {
         sensorValue_bin[8] = gyroX * 1000;
         sensorValue_bin[9] = gyroY * 1000;
         sensorValue_bin[10] = gyroZ * 1000;
-        sensorValue_bin[11] = gps_latitude * 1000000000;
-        sensorValue_bin[12] = gps_longitude * 1000000000;
+        sensorValue_bin[11] = 0;
+        sensorValue_bin[12] = 0;
         sensorValue_bin[13] = gps_time;
 
         for (int i = 0; i<14; i++) {
