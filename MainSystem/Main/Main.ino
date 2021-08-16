@@ -51,8 +51,6 @@ double delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
 #endif
 
 MPU9250_asukiaaa mySensor;
-double aX, aY, aZ, aSqrt;
-
 
 //for servomoter
 #include <ESP_servo.h>
