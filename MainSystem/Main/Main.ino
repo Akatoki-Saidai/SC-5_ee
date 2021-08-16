@@ -106,8 +106,6 @@ hw_timer_t *timer1 = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
 //for phase1,2
-
-int mode_average0 = 0;
 int mode_average1 = 0;
 int mode_average2 = 0;
 int count1 = 0;
