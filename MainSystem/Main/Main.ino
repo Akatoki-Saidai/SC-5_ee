@@ -548,14 +548,9 @@ void loop() {
 
                         break;
 
-                break;
-
-
-
-
         }//フェーズ関数閉じ
-
-
+ 
+        break;
 
 
         //無線通信による指示switch関数
