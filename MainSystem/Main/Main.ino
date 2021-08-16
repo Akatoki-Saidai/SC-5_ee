@@ -76,7 +76,6 @@ int interval = 30;
 int servophase = 6;
 int moter_end = 0;
 
-unsigned long time3, St_Time;
 
 
 //for BMP180
