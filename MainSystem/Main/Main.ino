@@ -564,67 +564,6 @@ void loop() {
 
         //無線通信による指示switch関数
         switch(key){
-
-            case 'i':
-            while(true){
-                currentMillis = millis();
-                if((moterstate == LOW) && (currentMillis - previousMillis >= OffTime)){
-                    moterstate = HIGH;
-                    previousMillis = currentMillis;
-                    Serial2.write("Moter start rotating \n");
-                    digitalWrite(4,moterstate);
-                }
-                else if((moterstate == HIGH) && (currentMillis - previousMillis >= OnTime)){
-                    moterstate = LOW;
-                    previousMillis = currentMillis;
-                    Serial2.write("Moter finished rotating \n");
-                    digitalWrite(4,moterstate);
-                    break;
-                }
-            }
-            previousMillis = currentMillis;
-            key = '0';
-            break;
-
-
-            case 'j':
-            if(nowAngle1 != Angle1){
-            while(pos1 != Angle1){
-                currentMillis = millis();
-                if((pos1 < Angle1) && (currentMillis - previousMillis >= interval)) {
-                    previousMillis = millis();
-                    servo1.write(pos1++);
-                    Serial2.write(pos1);
-                }
-                else if ((pos1 > Angle1) && (currentMillis - previousMillis >= interval)){
-                    previousMillis = millis();
-                    servo1.write(pos1--);
-                    Serial2.write(pos1);
-                }
-            }
-        }
-        Serial2.write("******Servo1 finished rotating***** \n");
-        if(nowAngle2 != Angle2){
-            while(pos2 != Angle2){
-                currentMillis = millis();
-                if((pos2 < Angle2) && (currentMillis - previousMillis >= interval)) {
-                    previousMillis = millis();
-                    servo2.write(pos2++);
-                    Serial2.write(pos2);
-                }
-                else if ((pos2 > Angle2) && (currentMillis - previousMillis >= interval)){
-                    previousMillis = millis();
-                    servo2.write(pos2--);
-                    Serial2.write(pos2);
-                }
-            }
-        }
-        Serial2.write("******Servo2 finished rotating*****\n");
-        nowAngle1 = Angle1;
-        nowAngle2 = Angle2;
-        key = '0';
-        break;
-
         case 'm':
         Serial2.write("****** Servo Motor1 plung angle determination mode ******\n");
         Serial2.write("Enter Motor Angle: ");
@@ -701,6 +640,41 @@ void loop() {
             key = '0';
             break;
 
+         case 'l':
+              Serial.write("WARNING: The firing code has been entered.\n");
+              Serial.write("WARNING: Are you sure you want to fire it?\n");
+              Serial.write("WARNING: Press the y key to allow firing.\n");
+              prelaunch = true;
+              key = '0';
+              break;
+
+         case 'y':
+              if(prelaunch){
+                if(ignitionstate){
+                  if(currentMillis - previousMillis >= launch_outputsecond * 1000){
+                    Serial.write("LAUCHING: 9V voltage is stop.\n");
+                    digitalWrite(launch_PIN, LOW); //オフ
+                    ignitionstate = 0;
+                    countdown = 3;
+                    prelaunch = false;
+                    key = '0';
+                  }
+                }
+                else if(currentMillis - previousMillis >= 1000){
+                  char c_countdown = '0' + countdown;
+                  Serial.write("COUNTDOWN: ");
+                  Serial.write(c_countdown);
+                  Serial.write("\n");
+                  --countdown;
+                  if(countdown+1<=0){
+                    Serial.write("LAUCHING: 9V voltage is output.\n");
+                    digitalWrite(launch_PIN, HIGH); //オン
+                    ignitionstate = true;
+                  }
+                  previousMillis = currentMillis;
+                }
+              }
+              break;
 
         case 'e':
             prelaunch = false;
