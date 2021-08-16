@@ -51,8 +51,6 @@ double delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
 #endif
 
 MPU9250_asukiaaa mySensor;
-double aX, aY, aZ, aSqrt;
-
 
 //for servomoter
 #include <ESP_servo.h>
@@ -111,7 +109,7 @@ int count1 = 0;
 int count2 = 0;
 double altitude_average = 0;
 double altitude_sum = 0;
-double altitude_target; //目標地点の高さ
+double altitude_target = 100; //目標地点の高さ
 double altitude_max; //目標地点の海抜高さ(BMPで測定)
 double TBD_accel = 6.0;
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
@@ -379,8 +377,8 @@ void loop() {
                     Serial2.Write("Phase3: transition completed\n");
                     Serial2.Write("");
                     phase_state = 3;
-                    St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
                     time3_1 = currentMillis;                           //phase3　開始時間の保存
+                    St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
 
                     Serial2.write("WARNING: The cut-para code has been entered.\n");
                     digitalWrite(cutparac, HIGH); //オン
@@ -409,10 +407,7 @@ void loop() {
 
                 case 2:
                     if (mySensor.accelUpdate() == 0) {
-                        aX = mySensor.accelX();
-                        aY = mySensor.accelY();
-                        aZ = mySensor.accelZ();
-                        accelsqrt = mySensor.accelSqrt();
+
                         if(!type_state == 2){   //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
                             Serial2.Write("Phase3_type2: transition completed\n");
                             Serial2.Write("");
@@ -423,16 +418,15 @@ void loop() {
                             differ = 0.1;   //移動平均の差
                         }
 
-                        accel = accelsqrt;
                         Acsum = 0;         //加速度5個の合計値
                         Acave = 0;         //加速度5個の平均値
                         RealDiffer = 0;    //1秒前との差を記憶する
 
                         if (i < 5){
-                            Accel[i] = accel;
+                            Accel[i] = accelSqrt;
                             i = i + 1;
                         }else{          //データが五個集まったとき
-                            Accel[i] = accel;
+                            Accel[i] = accelSqrt;
                             for(j=i-4 ; j==i ; j++){
                             Acsum = Acsum + Accel[j];
                             i = i + 1;
