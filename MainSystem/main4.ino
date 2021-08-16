@@ -167,10 +167,7 @@ void setup() {
     CanSatLogData = SD.open("/CanSatLogData.log", FILE_APPEND);
     SensorData = SD.open("/SensorData.bin",FILE_APPEND);
 
-    //無線通信
-    Serial.print("TESTING: Serial communication\n");
-    Serial.print("TESTING: Serial communication\n");
-    Serial.print(phase);
+
 
     //LED
     pinMode(launch_PIN, OUTPUT);        //点火用トランジスタの出力宣言
