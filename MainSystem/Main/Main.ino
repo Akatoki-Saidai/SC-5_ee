@@ -95,7 +95,7 @@ File SensorData;
 const int sck=13 , miso=15 , mosi=14 , ss=27; 
 
 //センサー値の格納
-double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, gps_latitude, gps_longitude;
+double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude;
 int gps_time;
 
 
@@ -229,13 +229,13 @@ void loop() {
         accelX = mySensor.accelX();
         accelY = mySensor.accelY();
         accelZ = mySensor.accelZ();
-        accelSqrt = mySensor.accelSqrt();
         magX = mySensor.magX();
         magY = mySensor.magY();
         magZ = mySensor.magZ();
         gyroX = mySensor.gyroX();
         gyroY = mySensor.gyroY();
         gyroZ = mySensor.gyroZ();
+        accelSqrt = mySensor.accelSqrt();
 
         // GPSデータの更新をするかどうか
         if(gps.location.isUpdated()){   //アップデートの実行
