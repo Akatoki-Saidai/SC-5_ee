@@ -17,7 +17,6 @@ int64_t sensorValue_bin[14];
 int Datanumber = 0;
 
 //phase3で使用する変数
-float aX, aY, aZ, aSqrt;
 int type_state = 1;
 int type = 1;
 float accelsqrt,accel;
