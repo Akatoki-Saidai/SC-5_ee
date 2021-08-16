@@ -374,8 +374,8 @@ void loop() {
             case 3:
                 if(!phase_state == 3){
                     //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.Write("Phase3: transition completed\n");
-                    Serial2.Write("");
+                    Serial2.write("Phase3: transition completed\n");
+                    Serial2.write("");
                     phase_state = 3;
                     time3_1 = currentMillis;                           //phase3　開始時間の保存
                     St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
@@ -389,18 +389,18 @@ void loop() {
                 switch(type){
                 case 1:
                     if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
-                        Serial2.Write("Phase3_type1: transition completed\n");
-                        Serial2.Write("");
+                        Serial2.write("Phase3_type1: transition completed\n");
+                        Serial2.write("");
                         type_state = 2;
 
-                        Serial2.Write("WARNING: The cut-para code has been entered.\n");
+                        Serial2.write("WARNING: The cut-para code has been entered.\n");
                         digitalWrite(cutparac, HIGH); //オン
-                        Serial2.Write("WARNING: 9v voltage is output.\n");
+                        Serial2.write("WARNING: 9v voltage is output.\n");
                     }
 
                     if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
                         digitalWrite(cutparac, LOW); //オフ
-                        Serial2.Write("WARNING: 9v voltage is stop.\n");
+                        Serial2.write("WARNING: 9v voltage is stop.\n");
                         type = 2;
                     }
 
@@ -409,8 +409,8 @@ void loop() {
                     if (mySensor.accelUpdate() == 0) {
 
                         if(!type_state == 2){   //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
-                            Serial2.Write("Phase3_type2: transition completed\n");
-                            Serial2.Write("");
+                            Serial2.write("Phase3_type2: transition completed\n");
+                            Serial2.write("");
                             type_state = 3;
                             i = 0;
                             j = 0;
