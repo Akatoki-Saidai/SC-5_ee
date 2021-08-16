@@ -21,7 +21,7 @@ int type_state = 1;
 int type = 1;
 float accelsqrt,accel;
 float time3_1,St_Time;
-float Accel[100000];           //計測した値を全ておいておく関数
+float Accel[100];           //計測した値を全ておいておく関数
 float Preac,differ,Acsum,Acave,RealDiffer;
 
 //for GPS
@@ -736,5 +736,8 @@ void loop() {
 
 
         }
-    }//割り込み関数の閉じ
-}//loop関数の閉じ
+    }
+    //割り込み関数の閉じ
+}
+//loop関数の閉じ
+}
