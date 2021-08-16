@@ -95,7 +95,7 @@ File SensorData;
 const int sck=13 , miso=15 , mosi=14 , ss=27; 
 
 //センサー値の格納
-double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, gps_latitude, gps_longitude;
+double Temperature, Pressure, accelX, accelY, accelZ, accelSqrt, magX, magY, magZ, gyroX, gyroY, gyroZ, gps_latitude, gps_longitude;
 int gps_time;
 
 
