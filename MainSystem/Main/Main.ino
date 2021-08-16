@@ -479,6 +479,7 @@ void loop() {
                 else if((moterstate == LOW) && (moter_end == 1) && (currentMillis - previousMillis >= OffTime)){
                     previousMillis = currentMillis;
                     phase = 5;
+                }
                 break;
 
 
