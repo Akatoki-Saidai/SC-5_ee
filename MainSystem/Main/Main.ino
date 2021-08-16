@@ -436,7 +436,7 @@ void loop() {
                         Serial2.Write("WARNING: 9v voltage is output.\n");
                     }
  
-                    if(time3_1 > St_Time){     //電流を流した時間が基準時間を超えたら 
+                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら 
                         digitalWrite(cutparac, LOW); //オフ
                         Serial2.Write("WARNING: 9v voltage is stop.\n");
                         type = 2;
