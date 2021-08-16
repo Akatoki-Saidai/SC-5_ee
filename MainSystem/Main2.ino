@@ -11,7 +11,7 @@ int launch_outputsecond = 5;       //点火時の9V電圧を流す時間，単�
 
 bool prelaunch = true;
 int countdown = 3;
-int ignitionstate = true;
+int ignitionstate = false;
 
 int64_t sensorValue_bin[14];
 int Datanumber = 0;
