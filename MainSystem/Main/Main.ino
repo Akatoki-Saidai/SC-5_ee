@@ -111,7 +111,7 @@ int count1 = 0;
 int count2 = 0;
 double altitude_average = 0;
 double altitude_sum = 0;
-double altitude_target; //目標地点の高さ
+double altitude_target = 100; //目標地点の高さ
 double altitude_max; //目標地点の海抜高さ(BMPで測定)
 double TBD_accel = 6.0;
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
