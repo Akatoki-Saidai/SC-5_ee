@@ -415,7 +415,7 @@ void loop() {
                         aY = mySensor.accelY();
                         aZ = mySensor.accelZ();
                         accelsqrt = mySensor.accelSqrt();
-                        if(!type_state == 2){　　//停止フェーズに入ったとき１回だけ実行したいプログラムを書く
+                        if(!type_state == 2){   //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
                             Serial2.Write("Phase3_type2: transition completed\n");
                             Serial2.Write("");
                             type_state = 3;
