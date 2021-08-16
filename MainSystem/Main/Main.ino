@@ -479,6 +479,7 @@ void loop() {
                 else if((moterstate == LOW) && (moter_end == 1) && (currentMillis - previousMillis >= OffTime)){
                     previousMillis = currentMillis;
                     phase = 5;
+                }
                 break;
 
 
@@ -547,14 +548,9 @@ void loop() {
 
                         break;
 
-                break;
-
-
-
-
         }//フェーズ関数閉じ
-
-
+ 
+        break;
 
 
         //無線通信による指示switch関数
