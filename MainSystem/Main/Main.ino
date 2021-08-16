@@ -21,7 +21,7 @@ int type_state = 1;
 int type = 1;
 float accelsqrt,accel;
 float time3_1,St_Time;
-float Accel[100000];           //計測した値を全ておいておく関数
+float Accel[6];           //計測した値をおいておく関数
 float Preac,differ,Acsum,Acave,RealDiffer;
 
 //for GPS
@@ -422,14 +422,19 @@ void loop() {
                         Acave = 0;         //加速度5個の平均値
                         RealDiffer = 0;    //1秒前との差を記憶する
 
-                        if (i < 5){
+                        if (i < 6){
                             Accel[i] = accelSqrt;
                             i = i + 1;
                         }else{          //データが五個集まったとき
                             Accel[i] = accelSqrt;
-                            for(j=i-4 ; j==i ; j++){
+                            for(j=1 ; j < 6 ; j++){
                             Acsum = Acsum + Accel[j];
-                            i = i + 1;
+                            if(i==5){
+                                i = 1;
+                            }else{
+                                i = i + 1;
+                            }
+                            
                             }
                             Acave = Acsum / 5;
                             RealDiffer = Preac - Acave;
