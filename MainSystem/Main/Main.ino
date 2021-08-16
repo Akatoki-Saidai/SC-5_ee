@@ -168,7 +168,9 @@ void setup() {
 
     //無線通信
     Serial2.begin(115200, SERIAL_8N1, 16, 17); //関数内の引数はデータ通信レート，わからん，RXピン，TXピン
-
+    Serial2.write("TESTING: Serial communication\n");
+    Serial2.write("TESTING: Serial communication\n");
+    
     //LED
     pinMode(launch_PIN, OUTPUT);        //点火用トランジスタの出力宣言
     pinMode(cutparac, OUTPUT);      //切り離し用トランジスタの出力宣言
