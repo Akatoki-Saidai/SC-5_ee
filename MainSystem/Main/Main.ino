@@ -229,6 +229,7 @@ void loop() {
         accelX = mySensor.accelX();
         accelY = mySensor.accelY();
         accelZ = mySensor.accelZ();
+        accelSqrt = mySensor.accelSqrt();
         magX = mySensor.magX();
         magY = mySensor.magY();
         magZ = mySensor.magZ();
