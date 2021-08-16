@@ -109,7 +109,7 @@ int mode_average1 = 0;
 int mode_average2 = 0;
 int count1 = 0;
 int count2 = 0;
-int separation_time = 2;
+int separation_second = 2;
 double altitude_average = 0;
 double altitude_sum = 0;
 double altitude_target = 100; //目標地点の高さ
@@ -118,6 +118,10 @@ double TBD_accel = 6.0;
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
 double TBD_h = altitude_max - altitude_target + TBD_altitude; //ニクロム線に電流を流し始める海抜高度
 double alt[5];
+
+
+//for phase5
+int launch_second = 15; //launch_second秒後に発射
 
 
 
@@ -255,6 +259,7 @@ void loop() {
 
 
         //地上局からのフェーズ指示
+        /*
         if(Serial2.available()){
 
             char key = Serial2.read();
@@ -281,6 +286,7 @@ void loop() {
                     break;
             }
         }//地上局からのフェーズ指示閉じ
+        */
 
 
 
@@ -301,6 +307,7 @@ void loop() {
                     phase_state = 1;
                 }
 
+                /*
                 if(accelSqrt >= 0.1 && accelSqrt <= 0.2 ) //最高点に来たら
                 {
                     if(mode_average1==0){//5個のデータがたまるまで
@@ -316,6 +323,7 @@ void loop() {
                       }
                     }
                 }
+                */
 
                 if(accelSqrt >= TBD_accel && accelZ < 0) //落下開始を加速度で判定
                 {
@@ -346,7 +354,7 @@ void loop() {
                 }
                 
 
-                if(currentMillis - previousMillis >= separation_time)
+                if(currentMillis - previousMillis >= separation_second*1000)
                 {
             
                    phase = 3;
@@ -564,10 +572,45 @@ void loop() {
                             CanSatLogData.print(gps_time);
                             CanSatLogData.print("\tServo2 finished rotating\n");
                             CanSatLogData.flush();
+                            previousMillis = currentMillis;
                             servophase = 8;
                         }
 
                         break;
+                    
+                    case 8:
+                        
+                      if(currentMillis - previousMillis >= launch_second*1000)
+                      {
+           
+                         if(prelaunch){
+                           if(ignitionstate){
+                              if(currentMillis - previousMillis >= launch_outputsecond * 1000){
+                                Serial.write("LAUCHING: 9V voltage is stop.\n");
+                                digitalWrite(launch_PIN, LOW); //オフ
+                                ignitionstate = 0;
+                                countdown = 3;
+                                prelaunch = false;
+                                key = '0';
+                              }
+                           }
+                           else if(currentMillis - previousMillis >= 1000){
+                              char c_countdown = '0' + countdown;
+                              Serial.write("COUNTDOWN: ");
+                              Serial.write(c_countdown);
+                              Serial.write("\n");
+                              --countdown;
+                              if(countdown+1<=0){
+                                Serial.write("LAUCHING: 9V voltage is output.\n");
+                                digitalWrite(launch_PIN, HIGH); //オン
+                                ignitionstate = true;
+                              }
+                              previousMillis = currentMillis;
+                           }
+                         }
+                      }
+                      break;
+                        
 
         }//フェーズ関数閉じ
  
@@ -575,7 +618,7 @@ void loop() {
 
 
         //無線通信による指示switch関数
-        switch(key){
+        /*switch(key){
         case 'm':
         Serial2.write("****** Servo Motor1 plung angle determination mode ******\n");
         Serial2.write("Enter Motor Angle: ");
@@ -660,36 +703,9 @@ void loop() {
               prelaunch = true;
               key = '0';
               break;
+         */
 
-         case 'y':
-              if(prelaunch){
-                if(ignitionstate){
-                  if(currentMillis - previousMillis >= launch_outputsecond * 1000){
-                    Serial.write("LAUCHING: 9V voltage is stop.\n");
-                    digitalWrite(launch_PIN, LOW); //オフ
-                    ignitionstate = 0;
-                    countdown = 3;
-                    prelaunch = false;
-                    key = '0';
-                  }
-                }
-                else if(currentMillis - previousMillis >= 1000){
-                  char c_countdown = '0' + countdown;
-                  Serial.write("COUNTDOWN: ");
-                  Serial.write(c_countdown);
-                  Serial.write("\n");
-                  --countdown;
-                  if(countdown+1<=0){
-                    Serial.write("LAUCHING: 9V voltage is output.\n");
-                    digitalWrite(launch_PIN, HIGH); //オン
-                    ignitionstate = true;
-                  }
-                  previousMillis = currentMillis;
-                }
-              }
-              break;
-
-        case 'e':
+        /*case 'e':
             prelaunch = false;
             digitalWrite(launch_PIN, LOW);
             ignitionstate = 0;
@@ -699,6 +715,7 @@ void loop() {
             break;
 
         }//無線通信による指示switch関数閉じ
+        */
        
             
         Datanumber++;
