@@ -106,6 +106,25 @@ volatile int timeCounter1;
 hw_timer_t *timer1 = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
+//for phase1,2
+
+int mode_average0 = 0;
+int mode_average1 = 0;
+int mode_average2 = 0;
+int count1 = 0;
+int count2 = 0;
+double altitude_average = 0;
+double altitude_sum = 0;
+double altitude_target; //目標地点の高さ
+double altitude_max; //目標地点の海抜高さ(BMPで測定)
+double TBD_accel = 6.0;
+double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
+double TBD_h = altitude_max - altitude_target + TBD_altitude; //ニクロム線に電流を流し始める海抜高度
+double alt[5];
+alt[0} = 0;
+alt[1] = 100000000000;
+double altitude_delta;
+
 
 
 //サーボモータの角度変更の計算
@@ -282,15 +301,69 @@ void loop() {
                     CanSatLogData.flush();
                     phase_state = 1;
                 }
+                
+                if(accelSqrt <= 0.1)//静止しているとき
+                {
+                  if(mode_average2==0){//5個のデータがたまるまで
+                    alt[count1] = altitude;
+                    count1++;
+                    if(count1==5){
+                        for(count2=0;count2<5;count2++){
+                          altitude_sum = altitude_sum + alt[count2]; // 受信したデータを足す
+                        }
+                        alt[1] = altitude_sum/5;
+                        mode_average2++;
+                        count1=0;
+                    }
+                  }
+                  else{//5個のデータがたまった後
+                    altitude_sum = 0;
+                    alt[count1] = altitude;
+                    count1++;
+                    if(count1==5){
+                        for(count2=0;count2<5;count2++){
+                          altitude_sum = altitude_sum + alt[count2]; // 受信したデータを足す
+                        }
+                        alt[0] = altitude_sum/5;
+                        mode_average2++;
+                        count1=0;
+                    }
+                  }
+                }
+                
+                altitude_delta = alt[1] - alt[0];
+                 
+                if(abs(altitude_delta) < 0.1 ) //最高点に来たら
+                {
+                    if(mode_average1==0){//5個のデータがたまるまで
+                      alt[count1] = altitude;
+                      count1++;
+                      if(count1==5){
+                          for(count2=0;count2<5;count2++){
+                            altitude_sum = altitude_sum + alt[count2]; // 受信したデータを足す
+                          }
+                          altitude_max = altitude_sum/5;
+                          mode_average1++;
+                          count1=0;
+                      }
+                    }
+                }
+
+                if(accelSqrt >= TBD_accel && accelZ < 0) //落下開始を加速度で判定
+                {
+                    Serial2.write("FALL STARTED\n");
+                    phase = 2;
+                }
+
+
+                /*if(altitude_average <= TBD_h) //パラシュートを分離する予定の高度を下回った場合、分離フェーズ(フェーズ3)に直接移行
+                {
+                    Serial.write("MPU DOESN'T OPERATE. SKIP PHASE 2.\n");
+                    phase = 3;
+                }*/
                                 
                 
-                
-
                 break;
-
-
-
-
 
             //########## 降下フェーズ ##########
             case 2:
@@ -302,13 +375,38 @@ void loop() {
                     CanSatLogData.flush();
                     phase_state = 2;
                 }
-
-
-
+                
+                if(altitude_average>TBD_h)
+                {
+                  if(mode_average2==0){//5個のデータがたまるまで
+                    alt[count1] = altitude;
+                    count1++;
+                    if(count1==5){
+                        for(count2=0;count2<5;count2++){
+                          altitude_sum = altitude_sum + alt[count2]; // いったん受信したデータを足す
+                        }
+                        altitude_average = altitude_sum/5;
+                        mode_average2++;
+                        count1=0;
+                    }
+                  }
+                  else{//5個のデータがたまった後
+                        altitude_sum = 0;
+                        altitude_average = 0;
+                        for(count2=0;count2<4;count2++){
+                          alt[count2]=alt[count2+1];
+                        }
+                        alt[5]=altitude;
+                        for(count2=0;count2<5;count2++){
+                          altitude_sum = altitude_sum + alt[count2];
+                        }
+                        altitude_average = altitude_sum/5;
+                  }
+                }else{//ニクロム線に電流を流す高度以下になったら
+                  phase = 3;
+                }
 
                 break;
-
-
 
             //########## 分離フェーズ ##########
             case 3:
