@@ -92,10 +92,10 @@ Adafruit_BMP085 bmp;
 File CanSatLogData;
 File SensorData;
 
-const int sck=13 , miso=15 , mosi=14 , ss=27;
+const int sck=13 , miso=15 , mosi=14 , ss=27; 
 
 //センサー値の格納
-double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude;
+double Temperature, Pressure, accelX, accelY, accelZ, accelSqrt, magX, magY, magZ, gyroX, gyroY, gyroZ, gps_latitude, gps_longitude;
 int gps_time;
 
 
@@ -229,13 +229,13 @@ void loop() {
         accelX = mySensor.accelX();
         accelY = mySensor.accelY();
         accelZ = mySensor.accelZ();
+        accelSqrt = mySensor.accelSqrt();
         magX = mySensor.magX();
         magY = mySensor.magY();
         magZ = mySensor.magZ();
         gyroX = mySensor.gyroX();
         gyroY = mySensor.gyroY();
         gyroZ = mySensor.gyroZ();
-        accelSqrt = mySensor.accelSqrt();
 
         // GPSデータの更新をするかどうか
         if(gps.location.isUpdated()){   //アップデートの実行
@@ -248,7 +248,7 @@ void loop() {
 
         }
 
-
+        
         //地上局からのフェーズ指示
         if(Serial2.available()){
 
@@ -262,7 +262,7 @@ void loop() {
                 case '2':
                     phase = 2;
                     break;
-
+                
                 case '3':
                     phase = 3;
                     break;
@@ -270,7 +270,7 @@ void loop() {
                 case '4':
                     phase = 4;
                     break;
-
+                
                 case '5':
                     phase = 5;
                     break;
@@ -278,7 +278,7 @@ void loop() {
         }//地上局からのフェーズ指示閉じ
 
 
-
+    
 
 
         //各フェーズごとの記述
@@ -286,7 +286,7 @@ void loop() {
 
             //########## 待機フェーズ ##########
             case 1:
-
+            
                 if(!phase_state == 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase1: transition completed\n");
@@ -295,7 +295,7 @@ void loop() {
                     CanSatLogData.flush();
                     phase_state = 1;
                 }
-
+               
                 if(accelSqrt >= 0.1 && accelSqrt <= 0.2 ) //最高点に来たら
                 {
                     if(mode_average1==0){//5個のデータがたまるまで
@@ -324,8 +324,8 @@ void loop() {
                     Serial.write("MPU DOESN'T OPERATE. SKIP PHASE 2.\n");
                     phase = 3;
                 }*/
-
-
+                                
+                
                 break;
 
             //########## 降下フェーズ ##########
@@ -338,7 +338,7 @@ void loop() {
                     CanSatLogData.flush();
                     phase_state = 2;
                 }
-
+                
                 if(altitude_average>TBD_h)
                 {
                   if(mode_average2==0){//5個のデータがたまるまで
@@ -378,18 +378,18 @@ void loop() {
                     Serial2.Write("Phase3: transition completed\n");
                     Serial2.Write("");
                     phase_state = 3;
-                    St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
                     time3_1 = currentMillis;                           //phase3　開始時間の保存
-
+                    St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
+                    
                     Serial2.write("WARNING: The cut-para code has been entered.\n");
                     digitalWrite(cutparac, HIGH); //オン
                     Serial2.write("WARNING: 9v voltage is output.\n");
                 }
-
-
+                    
+                
                 switch(type){
                 case 1:
-                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く              
                         Serial2.Write("Phase3_type1: transition completed\n");
                         Serial2.Write("");
                         type_state = 2;
@@ -398,8 +398,8 @@ void loop() {
                         digitalWrite(cutparac, HIGH); //オン
                         Serial2.Write("WARNING: 9v voltage is output.\n");
                     }
-
-                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
+ 
+                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら 
                         digitalWrite(cutparac, LOW); //オフ
                         Serial2.Write("WARNING: 9v voltage is stop.\n");
                         type = 2;
@@ -408,10 +408,7 @@ void loop() {
 
                 case 2:
                     if (mySensor.accelUpdate() == 0) {
-                        aX = mySensor.accelX();
-                        aY = mySensor.accelY();
-                        aZ = mySensor.accelZ();
-                        accelsqrt = mySensor.accelSqrt();
+                      
                         if(!type_state == 2){   //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
                             Serial2.Write("Phase3_type2: transition completed\n");
                             Serial2.Write("");
@@ -422,16 +419,15 @@ void loop() {
                             differ = 0.1;   //移動平均の差
                         }
 
-                        accel = accelsqrt;
                         Acsum = 0;         //加速度5個の合計値
                         Acave = 0;         //加速度5個の平均値
                         RealDiffer = 0;    //1秒前との差を記憶する
 
-                        if (i < 5){
-                            Accel[i] = accel;
+                        if (i < 5){          
+                            Accel[i] = accelSqrt;
                             i = i + 1;
                         }else{          //データが五個集まったとき
-                            Accel[i] = accel;
+                            Accel[i] = accelSqrt;
                             for(j=i-4 ; j==i ; j++){
                             Acsum = Acsum + Accel[j];
                             i = i + 1;
@@ -549,7 +545,7 @@ void loop() {
                             CanSatLogData.flush();
                             servophase = 8;
                         }
-
+                        
                         break;
 
                 break;
@@ -559,7 +555,7 @@ void loop() {
 
         }//フェーズ関数閉じ
 
-
+        
 
 
         //無線通信による指示switch関数
