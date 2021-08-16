@@ -30,9 +30,9 @@ float Preac,differ,Acsum,Acave,RealDiffer;
 
 TinyGPSPlus gps;
 
-// int i=0;
-// int n=0;
-// int j=0;
+int i=0;
+int n=0;
+int j=0;
 // double gpslat[10];
 // double sum_lat;
 // double gpslng[10];
