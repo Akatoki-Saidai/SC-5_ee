@@ -1,9 +1,6 @@
 int phase = 1;
 char key = '0';
 
-int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
-int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
-
 int phase_state = 0;
 
 int launch_PIN = 33;            //トランジスタのピン番号の宣言
@@ -19,9 +16,13 @@ int Datanumber = 0;
 //phase3で使用する変数
 int type_state = 1;
 int type = 1;
+int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
+int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
 float accelsqrt,accel;
 float time3_1,St_Time;
 float Accel[6];           //計測した値をおいておく関数
+int i=0;
+int j=0;
 
 
 float Preac,differ,Acsum,Acave,RealDiffer;
@@ -32,9 +33,9 @@ float Preac,differ,Acsum,Acave,RealDiffer;
 
 TinyGPSPlus gps;
 
-int i=0;
+//int i=0;
 int n=0;
-int j=0;
+//int j=0;
 // double gpslat[10];
 // double sum_lat;
 // double gpslng[10];
@@ -51,7 +52,6 @@ double delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
 #define SDA_MPU 21 //I2C通信
 #define SCL_MPU 22
 #endif
-
 MPU9250_asukiaaa mySensor;
 
 //for servomoter
@@ -181,8 +181,7 @@ void setup() {
     mySensor.beginAccel();
     mySensor.beginGyro();
     mySensor.beginMag();
-    // You can set your own offset for mag values
-    //Offset値を変える必要あり
+    //Offset値を変える必要あるかも
     mySensor.magXOffset = -50;
     mySensor.magYOffset = -55;
     mySensor.magZOffset = -10;
@@ -411,43 +410,54 @@ void loop() {
 
                 case 2:
                     if (mySensor.accelUpdate() == 0) {
-
-                        if(!type_state == 2){   //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
-                            Serial2.write("Phase3_type2: transition completed\n");
-                            Serial2.write("");
+                        if(!type_state == 2){　　//停止フェーズに入ったとき１回だけ実行したいプログラムを書く
+                            Serial.print("Phase3_type2: transition completed\n");
+                            Serial.print("");
                             type_state = 3;
                             i = 0;
                             j = 0;
                             Preac = 0;      //1秒前の加速度を記憶
                             differ = 0.1;   //移動平均の差
+                            Acave = 0;         //加速度5個の平均値
+                            RealDiffer = 0;    //1秒前との差を記憶する
                         }
 
                         Acsum = 0;         //加速度5個の合計値
-                        Acave = 0;         //加速度5個の平均値
-                        RealDiffer = 0;    //1秒前との差を記憶する
 
-                        if (i < 6){
-                            Accel[i] = accelSqrt;
-                            i = i + 1;
-                        }else{          //データが五個集まったとき
-                            Accel[i] = accelSqrt;
-                            for(j=1 ; j < 6 ; j++){
+                        switch(yeah){
+                          case 1:
+                                             //データを初めから五個得るまで
+                          Accel[i] = accelSqrt;
+                          i = i + 1;
+                          if(i == 6){        //5個得たらその時点での平均値を出し，次のフェーズへ
+                               yeah = 2;
+                               i = 0; //iの値をリセット
+                               for(j=1 ; j<6 ; j++){   //j=0の値は非常に誤差が大きいので1から
+                                Acsum = Acsum + Accel[j];　          
+                               }
+                               Acave = Acsum/5;
+                          }
+
+                          case 2:
+                          Preac = Acave;
+                          Accel[i] = accelSqrt;
+                          for(j=0 ; j<5 ; j++){
                             Acsum = Acsum + Accel[j];
-                            if(i==5){
-                                i = 1;
-                            }else{
-                                i = i + 1;
-                            }
-                            
-                            }
-                            Acave = Acsum / 5;
-                            RealDiffer = Preac - Acave;
-                            if( RealDiffer < differ ){ //移動平均が基準以内の変化量だった時
-                                type = 3;
-                                phase = 4;
-                            }
-                        Preac = Acave;    //次のループでは今のデータと比較する
+                          }
+                          Acave = Acsum5;
+                          RealDiffer = Preac - Acave;
+                          if(i == 5){
+                            i = 0;
+                          }else{
+                            i = i+1;
+                          }
+                          
+                          if( RealDiffer < differ ){ //移動平均が基準以内の変化量だった時
+                            phase = 4;
+                          }
                         }
+                    }else{
+                        
                     }
                 }
 
