@@ -32,18 +32,11 @@ float Preac,differ,Acsum,Acave,RealDiffer;
 
 TinyGPSPlus gps;
 
-int i=0;
-int n=0;
-int j=0;
-// double gpslat[10];
-// double sum_lat;
-// double gpslng[10];
-// double sum_lng;
-double GOAL_lat = 35.862857820;
-double GOAL_lng = 139.607681275;
-double v_initial= 38.0;  //[m/s]
-double g        = 9.80665;  //[m/s/s]
-double delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
+// double GOAL_lat = 35.862857820;
+// double GOAL_lng = 139.607681275;
+// double v_initial= 38.0;  //[m/s]
+// double gravity        = 9.80665;  //[m/s/s]
+// double delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
 
 //for MPU9250
 #include <MPU9250_asukiaaa.h>
@@ -119,13 +112,6 @@ double TBD_h = altitude_max - altitude_target + TBD_altitude; //ニクロム線�
 double alt[5];
 
 
-
-//サーボモータの角度変更の計算
-//int t_caculator(double distance_, v_initial_){
-//    theta = atan(power(initial_,2)/(g*distance_) + sqrt(power()))
-//}
-
-
 // Interrupt timer function
 void IRAM_ATTR onTimer1(){
     portENTER_CRITICAL_ISR(&timerMux);
@@ -167,7 +153,7 @@ void setup() {
     SensorData = SD.open("/SensorData.bin",FILE_APPEND);
 
     //無線通信
-    Serial2.begin(115200, SERIAL_8N1, 16, 17); //関数内の引数はデータ通信レート，わからん，RXピン，TXピン
+    Serial2.begin(115200, SERIAL_8N1, 16, 17); //関数内の引数はデータ通信レート，unknown，RXピン，TXピン
     Serial2.write("TESTING: Serial communication\n");
     Serial2.write("TESTING: Serial communication\n");
 
@@ -189,7 +175,7 @@ void setup() {
 
 
     //for GPS
-    Serial1.begin(115200, SERIAL_8N1, 5, 18); //関数内の引数はデータ通信レート,わからん,RXピンTXピン
+    Serial1.begin(115200, SERIAL_8N1, 5, 18); //関数内の引数はデータ通信レート,unknown,RXピンTXピン
 
 
     //for servomoter
@@ -197,7 +183,6 @@ void setup() {
     servo2.init(19,1);
     pinMode(4,OUTPUT);
     digitalWrite(4, moterstate);
-    Serial2.begin(115200);
 
     //for BMP
     Wire.begin(SDA_BMP, SCL_BMP);
@@ -205,6 +190,7 @@ void setup() {
     int sensorData_d[10];
 
     CanSatLogData.println("START RECORD");
+    CanSatLogData.flush();
 
 }//setup関数閉じ
 
@@ -291,61 +277,43 @@ void loop() {
             //########## 待機フェーズ ##########
             case 1:
 
-                if(!phase_state == 1){
+                if(phase_state != 1){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.write("Phase1: transition completed\n");
-                    CanSatLogData.print(gps_time);
-                    CanSatLogData.print("\tPhase1: transition completed\n");
+                    Serial2.write("Phase1: transition completed\n");    // 地上局へのデータ送信
+
+                    //LogDataの保存
+                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println("Phase1: transition completed");    
                     CanSatLogData.flush();
+
+
                     phase_state = 1;
                 }
 
-                if(accelSqrt >= 0.1 && accelSqrt <= 0.2 ) //最高点に来たら
-                {
-                    if(mode_average1==0){//5個のデータがたまるまで
-                      alt[count1] = altitude;
-                      count1++;
-                      if(count1==5){
-                          for(count2=0;count2<5;count2++){
-                            altitude_sum = altitude_sum + alt[count2]; // 受信したデータを足す
-                          }
-                          altitude_max = altitude_sum/5;
-                          mode_average1++;
-                          count1=0;
-                      }
-                    }
-                }
+                
 
-                if(accelSqrt >= TBD_accel && accelZ < 0) //落下開始を加速度で判定
-                {
-                    Serial2.write("FALL STARTED\n");
-                    phase = 2;
-                }
-
-
-                /*if(altitude_average <= TBD_h) //パラシュートを分離する予定の高度を下回った場合、分離フェーズ(フェーズ3)に直接移行
-                {
-                    Serial.write("MPU DOESN'T OPERATE. SKIP PHASE 2.\n");
-                    phase = 3;
-                }*/
 
 
                 break;
 
             //########## 降下フェーズ ##########
             case 2:
-                if(!phase_state == 2){
+                if(phase_state != 2){
                     //降下フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.write("Phase2: transition completed\n");
-                    CanSatLogData.print(gps_time);
-                    CanSatLogData.print("\tPhase2: transition completed\n");
+                    Serial2.write("Phase2: transition completed\n"); //地上局へのデータ送信
+                    
+                    //LogDataの保存
+                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println("Phase2: transition completed");
                     CanSatLogData.flush();
+
+
                     phase_state = 2;
                 }
 
                 if(altitude_average>TBD_h)
                 {
-                  if(mode_average2==0){//5個のデータがたまるまで
+                  if(mode_average2 == 0){//5個のデータがたまるまで
                     alt[count1] = altitude;
                     count1++;
                     if(count1==5){
@@ -375,12 +343,20 @@ void loop() {
 
                 break;
 
+
+
+
             //########## 分離フェーズ ##########
             case 3:
                 if(!phase_state == 3){
                     //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
                     Serial2.write("Phase3: transition completed\n");
-                    Serial2.write("");
+
+                    //LogDataの保存
+                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println("Phase2: transition completed");
+                    CanSatLogData.flush();
+
                     phase_state = 3;
                     time3_1 = currentMillis;                           //phase3　開始時間の保存
                     St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
@@ -388,101 +364,63 @@ void loop() {
                     Serial2.write("WARNING: The cut-para code has been entered.\n");
                     digitalWrite(cutparac, HIGH); //オン
                     Serial2.write("WARNING: 9v voltage is output.\n");
+
+                    //LogDataの保存
+                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println("9v voltage is output");
+                    CanSatLogData.flush();
+                    
                 }
 
 
-                switch(type){
-                case 1:
-                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
-                        Serial2.write("Phase3_type1: transition completed\n");
-                        Serial2.write("");
-                        type_state = 2;
-
-                        Serial2.write("WARNING: The cut-para code has been entered.\n");
-                        digitalWrite(cutparac, HIGH); //オン
-                        Serial2.write("WARNING: 9v voltage is output.\n");
-                    }
-
-                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
+                if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
                         digitalWrite(cutparac, LOW); //オフ
                         Serial2.write("WARNING: 9v voltage is stop.\n");
                         type = 2;
                     }
 
 
-                case 2:
-                    if (mySensor.accelUpdate() == 0) {
-
-                        if(!type_state == 2){   //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
-                            Serial2.write("Phase3_type2: transition completed\n");
-                            Serial2.write("");
-                            type_state = 3;
-                            i = 0;
-                            j = 0;
-                            Preac = 0;      //1秒前の加速度を記憶
-                            differ = 0.1;   //移動平均の差
-                        }
-
-                        Acsum = 0;         //加速度5個の合計値
-                        Acave = 0;         //加速度5個の平均値
-                        RealDiffer = 0;    //1秒前との差を記憶する
-
-                        if (i < 6){
-                            Accel[i] = accelSqrt;
-                            i = i + 1;
-                        }else{          //データが五個集まったとき
-                            Accel[i] = accelSqrt;
-                            for(j=1 ; j < 6 ; j++){
-                            Acsum = Acsum + Accel[j];
-                            if(i==5){
-                                i = 1;
-                            }else{
-                                i = i + 1;
-                            }
-                            
-                            }
-                            Acave = Acsum / 5;
-                            RealDiffer = Preac - Acave;
-                            if( RealDiffer < differ ){ //移動平均が基準以内の変化量だった時
-                                type = 3;
-                                phase = 4;
-                            }
-                        Preac = Acave;    //次のループでは今のデータと比較する
-                        }
-                    }
-                }
-
 
 
 
             //########## 採取フェーズ ##########
             case 4:
-                if(!phase_state == 4){
+                if(phase_state != 4){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.write("Phase4: transition completed\n");
-                    CanSatLogData.print(gps_time);
-                    CanSatLogData.print("\tPhase4: transition completed\n");
+                    Serial2.write("Phase4: transition completed\n");　//地上局へのデータ
+
+                    //LogDataの保存
+                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println("\tPhase4: transition completed\n");
                     CanSatLogData.flush();
+
+
                     phase_state = 4;
                 }
+
+
 
                 if((moterstate == LOW) && (moter_end == 0) && (currentMillis - previousMillis >= OffTime)){
 
                     moterstate = HIGH;
                     previousMillis = currentMillis;
                     Serial2.write("Moter start rotating \n");
-                    CanSatLogData.print(gps_time);
-                    CanSatLogData.print("\tMotor start rotating\n");
+
+                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println("Motor start rotating");
                     CanSatLogData.flush();
+
                     digitalWrite(4,moterstate);
 
                 }else if((moterstate == HIGH) && (moter_end == 0) && (currentMillis - previousMillis >= OnTime)){
                     moterstate = LOW;
                     previousMillis = currentMillis;
                     Serial2.write("Moter finished rotating \n");
+
                     CanSatLogData.print(gps_time);
                     CanSatLogData.print("\tMotor finished rotating\n");
                     CanSatLogData.flush();
+
                     digitalWrite(4,moterstate);
                     moter_end = 1;
                 }
@@ -499,10 +437,13 @@ void loop() {
             case 5:
                 if(!phase_state == 5){
                     //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.write("Phase5: transition completed\n");
-                    CanSatLogData.print(gps_time);
-                    CanSatLogData.print("\tPhase5: transition completed\n");
+                    Serial2.write("Phase5: transition completed\n"); // 地上局へのデータ
+
+                    //LogDataの保存
+                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println("Phase5: transition completed");
                     CanSatLogData.flush();
+
                     phase_state = 5;
                 }
 
@@ -561,132 +502,6 @@ void loop() {
         }//フェーズ関数閉じ
  
         break;
-
-
-        //無線通信による指示switch関数
-        switch(key){
-        case 'm':
-        Serial2.write("****** Servo Motor1 plung angle determination mode ******\n");
-        Serial2.write("Enter Motor Angle: ");
-        while(true){
-            if (Serial2.available() ){
-                String key = Serial2.readStringUntil(';');
-                Serial2.write(key.c_str());
-                Serial2.write('\n');
-                int newAngle1 = atoi(key.c_str());
-                if (nowAngle1 != newAngle1){
-                    if (newAngle1 <= 180 && newAngle1 >= 0){
-                        Serial2.write("WARMING: MORER1 IS ROTATING \n");
-                        while (pos1 != newAngle1){
-                            currentMillis = millis();
-                            if  ((pos1 < newAngle1) && (currentMillis - previousMillis >= interval)){
-                                previousMillis = currentMillis;
-                                servo1.write(pos1++);
-                                Serial2.write(pos1);
-                            }
-                            else if((pos1 > newAngle1) && (currentMillis - previousMillis >= interval)){
-                                previousMillis = currentMillis;
-                                servo1.write(pos1--);
-                                Serial2.write(pos1);
-                            }
-                        }
-                    }
-                    else{
-                        Serial2.write("Warming: Out of the range \n");
-                    }
-                    nowAngle1 = newAngle1;
-                }
-                break;
-            }
-        }
-        currentMillis = previousMillis;
-        key = '0';
-        break;
-
-        case 'n':
-        Serial2.write("****** Servo Motor2 launch angle determination mode ******\n");
-        Serial2.write("Enter Motor Angle: ");
-        while(true){
-            if (Serial2.available()){
-                String key = Serial2.readStringUntil(';');
-                Serial2.write(key.c_str());
-                Serial2.write('\n');
-                int newAngle2 = atoi(key.c_str());
-                if (nowAngle2 != newAngle2){
-                    if (newAngle2 <= 180 && newAngle2 >= 0){
-                        Serial2.write("WARMING: MORER1 IS ROTATING \n");
-                            while (pos2 != newAngle2){
-                                currentMillis = millis();
-                                if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
-                                    previousMillis = currentMillis;
-                                    servo2.write(pos2++);
-                                    Serial2.write(pos2);
-                                }
-                                else if ((pos2 > newAngle2) && (currentMillis - previousMillis >= interval)){
-                                    previousMillis = currentMillis;
-                                    servo2.write(pos2--);
-                                    Serial2.write(pos2);
-                                }
-                            }
-                        }
-                        else{
-                            Serial2.write("Warming: Out of the range\n");
-                        }
-                        nowAngle2 = newAngle2;
-                    }
-                    break;
-                }
-            }
-            currentMillis = previousMillis;
-            key = '0';
-            break;
-
-         case 'l':
-              Serial.write("WARNING: The firing code has been entered.\n");
-              Serial.write("WARNING: Are you sure you want to fire it?\n");
-              Serial.write("WARNING: Press the y key to allow firing.\n");
-              prelaunch = true;
-              key = '0';
-              break;
-
-         case 'y':
-              if(prelaunch){
-                if(ignitionstate){
-                  if(currentMillis - previousMillis >= launch_outputsecond * 1000){
-                    Serial.write("LAUCHING: 9V voltage is stop.\n");
-                    digitalWrite(launch_PIN, LOW); //オフ
-                    ignitionstate = 0;
-                    countdown = 3;
-                    prelaunch = false;
-                    key = '0';
-                  }
-                }
-                else if(currentMillis - previousMillis >= 1000){
-                  char c_countdown = '0' + countdown;
-                  Serial.write("COUNTDOWN: ");
-                  Serial.write(c_countdown);
-                  Serial.write("\n");
-                  --countdown;
-                  if(countdown+1<=0){
-                    Serial.write("LAUCHING: 9V voltage is output.\n");
-                    digitalWrite(launch_PIN, HIGH); //オン
-                    ignitionstate = true;
-                  }
-                  previousMillis = currentMillis;
-                }
-              }
-              break;
-
-        case 'e':
-            prelaunch = false;
-            digitalWrite(launch_PIN, LOW);
-            ignitionstate = 0;
-            countdown = 3;
-            Serial2.write("WARNING: The EMERGENCY code has been entered\n");
-            key = '0';
-            break;
-
-        }//無線通信による指示switch関数閉じ
 
         Datanumber++;
 
