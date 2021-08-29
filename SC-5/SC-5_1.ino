@@ -14,18 +14,17 @@ int64_t sensorValue_bin[14];
 int Datanumber = 0;
 
 //phase3で使用する変数
-int type_state = 1;
 int type = 1;
+int yeah = 1;
+int type_state = 1;
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
-float accelsqrt,accel;
-float time3_1,St_Time;
-float Accel[6];           //計測した値をおいておく関数
+float time3_1,St_Time;      //時間に関するもの
+float Accel[6];          　 //計測した値をおいておく関数
+float Preac,differ,Acsum,Acave,RealDiffer;
 int i=0;
 int j=0;
 
-
-float Preac,differ,Acsum,Acave,RealDiffer;
 
 //for GPS
 #include <TinyGPS++.h>
