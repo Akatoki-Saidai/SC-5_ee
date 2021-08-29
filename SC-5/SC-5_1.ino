@@ -376,87 +376,75 @@ void loop() {
             case 3:
                 if(!phase_state == 3){
                     //分離フェーズに入ったとき１回だけ実行したいプログラムを書く
-                    Serial2.write("Phase3: transition completed\n");
-                    Serial2.write("");
+                    Serial2.Write("Phase3: transition completed\n");
+                    Serial2.Write("");
                     phase_state = 3;
-                    time3_1 = currentMillis;                           //phase3　開始時間の保存
                     St_Time = time3_1 + outputcutsecond * 1000;        //基準時間
-
+                    time3_1 = currentMillis;                           //phase3　開始時間の保存
+                    
                     Serial2.write("WARNING: The cut-para code has been entered.\n");
                     digitalWrite(cutparac, HIGH); //オン
                     Serial2.write("WARNING: 9v voltage is output.\n");
                 }
-
-
+                    
+                
                 switch(type){
                 case 1:
-                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
-                        Serial2.write("Phase3_type1: transition completed\n");
-                        Serial2.write("");
+                    if(!type_state == 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く              
+                        Serial2.Write("Phase3_type1: transition completed\n");
+                        Serial2.Write("");
                         type_state = 2;
 
-                        Serial2.write("WARNING: The cut-para code has been entered.\n");
+                        Serial2.Write("WARNING: The cut-para code has been entered.\n");
                         digitalWrite(cutparac, HIGH); //オン
-                        Serial2.write("WARNING: 9v voltage is output.\n");
+                        Serial2.Write("WARNING: 9v voltage is output.\n");
                     }
-
-                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
+ 
+                    if(time3_1 > St_Time){     //電流を流した時間が基準時間を超えたら 
                         digitalWrite(cutparac, LOW); //オフ
-                        Serial2.write("WARNING: 9v voltage is stop.\n");
+                        Serial2.Write("WARNING: 9v voltage is stop.\n");
                         type = 2;
                     }
 
 
                 case 2:
                     if (mySensor.accelUpdate() == 0) {
+                        aX = mySensor.accelX();
+                        aY = mySensor.accelY();
+                        aZ = mySensor.accelZ();
+                        accelsqrt = mySensor.accelSqrt();
                         if(!type_state == 2){　　//停止フェーズに入ったとき１回だけ実行したいプログラムを書く
-                            Serial.print("Phase3_type2: transition completed\n");
-                            Serial.print("");
+                            Serial2.Write("Phase3_type2: transition completed\n");
+                            Serial2.Write("");
                             type_state = 3;
                             i = 0;
                             j = 0;
                             Preac = 0;      //1秒前の加速度を記憶
                             differ = 0.1;   //移動平均の差
-                            Acave = 0;         //加速度5個の平均値
-                            RealDiffer = 0;    //1秒前との差を記憶する
                         }
 
+                        accel = accelsqrt;
                         Acsum = 0;         //加速度5個の合計値
+                        Acave = 0;         //加速度5個の平均値
+                        RealDiffer = 0;    //1秒前との差を記憶する
 
-                        switch(yeah){
-                          case 1:
-                                             //データを初めから五個得るまで
-                          Accel[i] = accelSqrt;
-                          i = i + 1;
-                          if(i == 6){        //5個得たらその時点での平均値を出し，次のフェーズへ
-                               yeah = 2;
-                               i = 0; //iの値をリセット
-                               for(j=1 ; j<6 ; j++){   //j=0の値は非常に誤差が大きいので1から
-                                Acsum = Acsum + Accel[j];　          
-                               }
-                               Acave = Acsum/5;
-                          }
-
-                          case 2:
-                          Preac = Acave;
-                          Accel[i] = accelSqrt;
-                          for(j=0 ; j<5 ; j++){
+                        if (i < 5){          
+                            Accel[i] = accel;
+                            i = i + 1;
+                        }else{          //データが五個集まったとき
+                            Accel[i] = accel;
+                            for(j=i-4 ; j==i ; j++){
                             Acsum = Acsum + Accel[j];
-                          }
-                          Acave = Acsum5;
-                          RealDiffer = Preac - Acave;
-                          if(i == 5){
-                            i = 0;
-                          }else{
-                            i = i+1;
-                          }
-                          
-                          if( RealDiffer < differ ){ //移動平均が基準以内の変化量だった時
-                            phase = 4;
-                          }
+                            i = i + 1;
+                            }
+                            Acave = Acsum / 5;
+                            RealDiffer = Preac - Acave;
+                            if( RealDiffer < differ ){ //移動平均が基準以内の変化量だった時
+                                type = 3;
+                                phase = 4;
+                            }
+                        Preac = Acave;    //次のループでは今のデータと比較する
                         }
-                    }else{
-                        
                     }
                 }
 
