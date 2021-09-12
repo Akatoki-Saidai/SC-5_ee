@@ -421,7 +421,8 @@ void loop() {
                             differ1 = 0.1;     //accelsqurt移動平均の差
                             differ2 = 0.5;        //altitude移動平均の差
                             Acave = 0;         //加速度5個の平均値
-                            RealDiffer = 0;    //1秒前との差を記憶する
+                            RealDiffer1 = 0;    //1秒前との差を記憶する
+                            RelaDiffer2 = 0;
                         }
 
                         Acsum = 0;         //加速度5個の合計値
