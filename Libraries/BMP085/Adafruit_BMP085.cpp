@@ -84,7 +84,7 @@ uint32_t Adafruit_BMP085::readRawPressure(void) {
   write8(BMP085_CONTROL, BMP085_READPRESSURECMD + (oversampling << 6));
 
   if (oversampling == BMP085_ULTRALOWPOWER) 
-    delay(5);
+    delay(0);
   else if (oversampling == BMP085_STANDARD) 
     delay(8);
   else if (oversampling == BMP085_HIGHRES) 
