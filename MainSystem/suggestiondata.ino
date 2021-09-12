@@ -21,7 +21,9 @@ int cutparac = 32;          //切り離し用トランジスタのピン番号�
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
 float time3_1,St_Time;      //時間に関するもの
 float Accel[6];          　 //計測した値をおいておく関数
-float Preac,differ,Acsum,Acave,RealDiffer;
+float Altitude[6];          //(高度)
+float Preac,differ1,Acsum,Acave,RealDiffer1;
+float Preal,differ2,Alsum,Alave,RealDiffer2;
 int i=0;
 int j=0;
 
@@ -333,7 +335,7 @@ void loop() {
                     }
 
 
-                case 2:
+                case 2:  //type = 2
                     if (mySensor.accelUpdate() == 0) {
                         if(!type_state == 2){　　//停止フェーズに入ったとき１回だけ実行したいプログラムを書く
                             Serial2.Write("Phase3_type2: transition completed\n");
@@ -341,48 +343,55 @@ void loop() {
                             type_state = 3;
                             i = 0;
                             j = 0;
-                            Preac = 0;      //1秒前の加速度を記憶
-                            differ = 0.1;   //移動平均の差
+                            Preac = 0;         //1秒前の加速度を記憶
+                            differ1 = 0.1;     //accelsqurt移動平均の差
+                            differ2 = 0.5;        //altitude移動平均の差
                             Acave = 0;         //加速度5個の平均値
                             RealDiffer = 0;    //1秒前との差を記憶する
                         }
 
                         Acsum = 0;         //加速度5個の合計値
+                        Alsum = 0;         //高度5個の合計値
 
-                        switch(yeah){
-                          case 1:
-                                             //データを初めから五個得るまで
+                        if(yeah == 1){     //データを初めから五個得るまで
                           Accel[i] = accelSqrt;
+                          Altitude[i] = altitude;
                           i = i + 1;
                           if(i == 6){        //5個得たらその時点での平均値を出し，次のフェーズへ
                                yeah = 2;
                                i = 0; //iの値をリセット
                                for(j=1 ; j<6 ; j++){   //j=0の値は非常に誤差が大きいので1から
-                                Acsum = Acsum + Accel[j];　          
+                                Acsum = Acsum + Accel[j];　  
+                                Alsum = Alsum + Altitude[j];
                                }
                                Acave = Acsum/5;
+                               Alave = Alave/5;
                           }
-
-                          case 2:
+                        }else{
                           Preac = Acave;
+                          Preal = Alave;  
                           Accel[i] = accelSqrt;
+                          Altitude[i] = altitude;
                           for(j=0 ; j<5 ; j++){
                             Acsum = Acsum + Accel[j];
+                            Alsum = Alsum + Altitude[j];
                           }
-                          Acave = Acsum5;
-                          RealDiffer = Preac - Acave;
+                          Acave = Acsum/5;
+                          Alave = Alsum/5;
+                          RealDiffer1 = Preac - Acave;
+                          RealDiffer2 = Preal - Alave;
                           if(i == 5){
                             i = 0;
                           }else{
                             i = i+1;
                           }
                           
-                          if( RealDiffer < differ ){ //移動平均が基準以内の変化量だった時
+                          if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
+                            phase = 4;
+                          }else( RealDiffer2 < differ2 ){
                             phase = 4;
                           }
                         }
-                    }else{
-                        
                     }
                 }
 
