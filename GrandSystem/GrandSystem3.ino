@@ -1,12 +1,16 @@
 #include <SD.h>
 #include <SPI.h>
 File file;
-File data;
+unsigned long prev, next, interval;
 
 void setup() {
+  
+  prev = 0;
+  interval = 2000;
+  
   Serial.begin(115200);
-  while(!Serial){
-    ;
+  while(!Serial);
+    Serial.println("Cannot mobilize this system.")
   }
   //SD test
   Serial.print("\nInitializing SD card...");
@@ -40,8 +44,8 @@ void setup() {
  Serial.println("SD test ended.");
  //SD test ended.
 
- data = SD.open("CanSatLogData",FILE_WRITE);
- if(data){
+ file = SD.open("Logdata",FILE_WRITE);
+ if(file){
     Serial.println("done");
   }else{
     Serial.println("error...");
@@ -50,7 +54,6 @@ void setup() {
 
 void loop() {
   if(Serial.available()){
-    for (int z=0; z < 64; z++ /*64bit通信が始まるまで*/){
       for (int x=0; x <= 2; x++){
         byte a = Serial.read();
         byte b = a<<8;
@@ -58,9 +61,10 @@ void loop() {
         int16_t d = b | c;
 
         Serial.println(d);
-        if(data){
-          data.println(d);
-          data.close();
+        
+        if(file){
+          file.println(d);
+          file.close();
         }
 
         if(x > 0){
@@ -79,6 +83,9 @@ void loop() {
            break;
           case 4:
            Serial.println("Phase4:transition completed.");
+            
+            goto label;
+            
            break;
           case 5:
            Serial.println("Phase5:transition completed.");
@@ -97,9 +104,9 @@ void loop() {
            break; 
           default:;
         }
-      }
     }
-
+   label:
+    
      for (int y=0; y < 14; y++){
        byte e = Serial.read();
        byte f = e<<56;
@@ -118,14 +125,22 @@ void loop() {
        byte s = Serial.read();
        int64_t u = f | h | j | l | n | p | r;
 
-      if(data){
-          data.println("u");
+      if(file){
+          data.println((int)u);
           data.close();
         }
+       
+       unsigned long curr = millis();
+       if((curr - prev) >= interval){
+         Serial.println((int)u);
+         prev = curr;
+       }
+       
 
       if(y > 0){
         continue;
           }
+       
       switch(u){
         case 1:
          Serial.println("Phase1:transition completed.");
