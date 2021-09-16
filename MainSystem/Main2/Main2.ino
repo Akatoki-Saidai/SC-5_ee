@@ -95,7 +95,7 @@ File SensorData;
 const int sck=13 , miso=15 , mosi=14 , ss=27;
 
 //センサー値の格納
-double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude, altitude;
+double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude, gps_altitude, altitude;
 int gps_time;
 
 
@@ -105,10 +105,11 @@ hw_timer_t *timer1 = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
 //for phase1,2
-int mode_average1 = 0;
-int mode_average2 = 0;
+int mode_average = 0;
+int mode_comparison = 0;
 int count1 = 0;
 int count2 = 0;
+int count3 = 0;
 double altitude_average = 0;
 double altitude_sum = 0;
 double altitude_target = 100; //目標地点の高さ
@@ -117,6 +118,16 @@ double TBD_accel = 6.0;
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
 double TBD_h = altitude_max - altitude_target + TBD_altitude; //ニクロム線に電流を流し始める海抜高度
 double alt[5];
+accelZ = 10000;
+accelSqrt = 10000;
+altitude = 10000;
+unsigned long current_millis;
+unsigned long previous_millis;
+double altitude_sum_mpu = 0;
+double altitude_sum_bmp = 0;
+double altitude_sum_gps = 0;
+double previous_altitude;
+double current_altitude;
 
 
 // Interrupt timer function
@@ -241,6 +252,7 @@ void loop() {
 
             gps_latitude = gps.location.lat();
             gps_longitude = gps.location.lng();
+            gps_altitude = gps.altitude.meters();
             gps_time = gps.time.value();
 
         }
@@ -293,15 +305,115 @@ void loop() {
                     CanSatLogData.println("Phase1: transition completed");    
                     CanSatLogData.flush();
 
-
+                    if(altitude == 10000 && accelSqrt == 10000 && accelZ == 10000) //センサーチェック
+                    {
+                       sensor = 1;
+                    }
+                    
                     phase_state = 1;
                 }
+           
+                switch (sensor){
+                        case 0://MPUとBMPの両方，もしくはどちらか一方が使えるとき
 
-                
+                                if(accelSqrt >= TBD_accel && accelZ < 0) //落下開始をMPUで判定
+                                {
+                                      altitude_sum_mpu += altitude;
+                                      count1++;
+                                      if(count1==5){
+                                          altitude_max = altitude_sum_mpu/5;
+                                          altitude_sum_mpu = 0;
+                                          count1=0;
+                                          Serial2.write("FALL STARTED(by MPU)\n");
+                                          phase = 2;
+                                      }
+                                }
 
+                                switch(mode_comparison){//落下開始をBMPで判定
+                                  case 0:     
+                                              previous_millis = millis();
+                                              altitude_sum_bmp += altitude;
+                                              count3++;
+                                              if(count3==5)
+                                              {
+                                                previous_altitude = altitude_sum_bmp/5;
+                                                altitude_sum_bmp = 0;
+                                                count3 = 0;
+                                                mode_comparison = 1;
+                                              }
+                                              break;
 
+                                  case 1://500ms後     
+                                              current_millis = millis();
+                                              if(current_millis - previous_millis >= 500)
+                                              {
+                                                altitude_sum_bmp += altitude;
+                                                count3++;
+                                                if(count3==5)
+                                                {
+                                                  current_altitude = altitude_sum_bmp/5;
+                                                  if(current_altitude - previous_altitude <= -1.0)
+                                                  {
+                                                    altitude_max = current_altitude;
+                                                    Serial2.write("FALL STARTED(by BMP)\n");
+                                                    phase = 2;
+                                                  }
+                                                  else
+                                                  {
+                                                    altitude_sum_bmp = 0;
+                                                    count3 = 0;
+                                                    mode_comparison = 0;
+                                                  } 
+                                                } 
+                                              }
+                                              break;
+                                }
+                                break;
+                                                           
+                        case 1;//MPUとBMPが共に使えないとき→落下開始をGPSで判定
+                                switch(mode_comparison){
+                                  case 0:     
+                                              previous_millis = millis();
+                                              altitude_sum_gps += gps_altitude;
+                                              count3++;
+                                              if(count3==5)
+                                              {
+                                                previous_altitude = altitude_sum_gps/5;
+                                                altitude_sum_gps = 0;
+                                                count3 = 0;
+                                                mode_comparison = 1;
+                                              }
+                                              break;
 
+                                  case 1://500ms後     
+                                              current_millis = millis();
+                                              if(current_millis - previous_millis >= 500)
+                                              {
+                                                altitude_sum_gps += gps_altitude;
+                                                count3++;
+                                                if(count3==5)
+                                                {
+                                                  current_altitude = altitude_sum_gps/5;
+                                                  if(current_altitude - previous_altitude <= -1.0)
+                                                  {
+                                                    altitude_max = current_altitude;
+                                                    Serial2.write("FALL STARTED(by GPS)\n");
+                                                    phase = 2;
+                                                  }
+                                                  else
+                                                  {
+                                                    altitude_sum_gps = 0;
+                                                    count3 = 0;
+                                                    mode_comparison = 0;
+                                                  } 
+                                                } 
+                                              }
+                                              break;
+                                }
+
+                }
                 break;
+
 
             //########## 降下フェーズ ##########
             case 2:
@@ -318,39 +430,73 @@ void loop() {
                     phase_state = 2;
                 }
 
-                if(altitude_average>TBD_h)
-                {
-                  if(mode_average2 == 0){//5個のデータがたまるまで
-                    alt[count1] = altitude;
-                    count1++;
-                    if(count1==5){
-                        for(count2=0;count2<5;count2++){
-                          altitude_sum = altitude_sum + alt[count2]; // いったん受信したデータを足す
-                        }
-                        altitude_average = altitude_sum/5;
-                        mode_average2++;
-                        count1=0;
-                    }
-                  }
-                  else{//5個のデータがたまった後
-                        altitude_sum = 0;
-                        altitude_average = 0;
-                        for(count2=0;count2<4;count2++){
-                          alt[count2]=alt[count2+1];
-                        }
-                        alt[4]=altitude;
-                        for(count2=0;count2<5;count2++){
-                          altitude_sum = altitude_sum + alt[count2];
-                        }
-                        altitude_average = altitude_sum/5;
-                  }
-                }else{//ニクロム線に電流を流す高度以下になったら
-                  phase = 3;
+                switch (sensor){
+                     case 0://BMPが使えるとき→BMPで判定(移動平均)
+                              if(altitude_average>TBD_h)
+                              {
+                                if(mode_average==0){//5個のデータがたまるまで
+                                  alt[count1] = altitude;
+                                  count1++;
+                                  if(count1==5){
+                                      for(count2=0;count2<5;count2++){
+                                        altitude_sum_bmp += alt[count2]; // いったん受信したデータを足す
+                                      }
+                                      altitude_average = altitude_sum_bmp/5;
+                                      mode_average = 1;
+                                      count1=0;
+                                  }
+                                }
+                                else{//5個のデータがたまった後
+                                      altitude_sum_bmp = 0;
+                                      altitude_average = 0;
+                                      for(count2=0;count2<4;count2++){
+                                        alt[count2]=alt[count2+1];
+                                      }
+                                      alt[4]=altitude;
+                                      for(count2=0;count2<5;count2++){
+                                        altitude_sum_bmp += alt[count2];
+                                      }
+                                      altitude_average = altitude_sum_bmp/5;
+                                }
+                              }else{//ニクロム線に電流を流す高度以下になったら
+                                phase = 3;
+                              }
+                              break;
+
+                     case 1://BMPが使えないとき→GPSで判定(移動平均)
+                              if(altitude_average>TBD_h)
+                              {
+                                if(mode_average==0){//5個のデータがたまるまで
+                                  alt[count1] = gps_altitude;
+                                  count1++;
+                                  if(count1==5){
+                                      for(count2=0;count2<5;count2++){
+                                        altitude_sum_gps += alt[count2]; // いったん受信したデータを足す
+                                      }
+                                      altitude_average = altitude_sum_gps/5;
+                                      mode_average = 1;
+                                      count1=0;
+                                  }
+                                }
+                                else{//5個のデータがたまった後
+                                      altitude_sum_gps = 0;
+                                      altitude_average = 0;
+                                      for(count2=0;count2<4;count2++){
+                                        alt[count2]=alt[count2+1];
+                                      }
+                                      alt[4]=gps_altitude;
+                                      for(count2=0;count2<5;count2++){
+                                        altitude_sum_gps += alt[count2];
+                                      }
+                                      altitude_average = altitude_sum/5;
+                                }
+                              }else{//ニクロム線に電流を流す高度以下になったら
+                                phase = 3;
+                              }
+                              break;
+                
                 }
-
                 break;
-
-
 
 
             //########## 分離フェーズ ##########
