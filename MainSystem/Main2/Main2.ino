@@ -553,15 +553,15 @@ void loop() {
                             i = 0;
                             j = 0;
                             Preac = 0;         //1秒前の加速度を記憶
-                            differ1 = 0.1;     //accelsqurt移動平均の差
-                            differ2 = 0.5;        //altitude移動平均の差
-                            Acave = 0;         //加速度5個の平均値
-                            RealDiffer1 = 0;    //1秒前との差を記憶する
+                            differ1 = 0.1;     //加速度　移動平均の差
+                            differ2 = 0.5;     //高度　　移動平均の差
+                            Acave = 0;         //加速度　5個の平均値
+                            Alave = 0;         //高度　　5個の平均値
+                            Acsum = 0;         //加速度　5個の合計値
+                            Alsum = 0;         //高度　　5個の合計値
+                            RealDiffer1 = 0;   //1秒前との差を記憶する
                             RealDiffer2 = 0;
                         }
-
-                        Acsum = 0;         //加速度5個の合計値
-                        Alsum = 0;         //高度5個の合計値
 
                         if(yeah == 1){     //データを初めから五個得るまで
                           Accel[i] = accelSqrt;
@@ -592,6 +592,8 @@ void loop() {
                           RealDiffer2 = Preal - Alave;
                           if(i == 5){
                             i = 0;
+                            Acsum = 0; 
+                            Asum = 0;
                           }else{
                             i = i+1;
                           }
