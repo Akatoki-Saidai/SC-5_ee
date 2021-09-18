@@ -571,7 +571,7 @@ void loop() {
                                yeah = 2;
                                i = 0; //iの値をリセット
                                for(j=1 ; j<6 ; j++){   //j=0の値は非常に誤差が大きいので1から
-                                Acsum = Acsum + Accel[j];　  
+                                Acsum = Acsum + Accel[j];
                                 Alsum = Alsum + Altitude[j];
                                }
                                Acave = Acsum/5;
@@ -579,7 +579,7 @@ void loop() {
                           }
                         }else{
                           Preac = Acave;
-                          Preal = Alave;  
+                          Preal = Alave;
                           Accel[i] = accelSqrt;
                           Altitude[i] = altitude;
                           for(j=0 ; j<5 ; j++){
