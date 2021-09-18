@@ -95,7 +95,7 @@ File SensorData;
 const int sck=13 , miso=15 , mosi=14 , ss=27;
 
 //センサー値の格納
-double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt, gps_latitude, gps_longitude, gps_altitude, altitude;
+double Temperature, Pressure, accelX, accelY, accelZ = 10000, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt = 10000, gps_latitude, gps_longitude, gps_altitude, altitude = 10000;
 int gps_time;
 
 
@@ -105,6 +105,7 @@ hw_timer_t *timer1 = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
 //for phase1,2
+int sensor = 0;
 int mode_average = 0;
 int mode_comparison = 0;
 int count1 = 0;
@@ -118,9 +119,6 @@ double TBD_accel = 6.0;
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
 double TBD_h = altitude_max - altitude_target + TBD_altitude; //ニクロム線に電流を流し始める海抜高度
 double alt[5];
-accelZ = 10000;
-accelSqrt = 10000;
-altitude = 10000;
 unsigned long current_millis;
 unsigned long previous_millis;
 double altitude_sum_mpu = 0;
@@ -370,7 +368,7 @@ void loop() {
                                 }
                                 break;
                                                            
-                        case 1;//MPUとBMPが共に使えないとき→落下開始をGPSで判定
+                    case 1://MPUとBMPが共に使えないとき→落下開始をGPSで判定
                                 switch(mode_comparison){
                                   case 0:     
                                               previous_millis = millis();
