@@ -1,6 +1,9 @@
 #include <SD.h>
 #include <SPI.h>
+#include <SoftwareSerial.h>
+
 File file;
+SoftwareSerial Serial2(2,3);
 unsigned long prev, next, interval;
 
 void setup() {
@@ -9,42 +12,43 @@ void setup() {
   interval = 2000;
   
   Serial.begin(115200);
+  Serial2.begin(115200);
   while(!Serial);
     Serial.println("Cannot mobilize this system.")
   }
   //SD test
-  Serial.print("\nInitializing SD card...");
+  Serial.println("Initializing SD card...");
 
   if(!SD.begin(4)){
-    Serial.println("initialization failed.");
+    Serial.println("Initialization failed.");
     while(1);
   }else{
     Serial.println("Wirinig is corrct and card is present.");
   }
 
-  file = SD.open("test.txt",FILE_WRITE);
+  file = SD.open("test.bin",FILE_WRITE);
 
   if(file){
-    Serial.println("Writing to test.txt...");
-    file.println("testing 1,2,3.");
+    Serial.println("Writing to test.bin...");
+    file.write("testing 1,2,3.\n");
     file.close();
     Serial.println("done");
   }else{
     Serial.println("error...");
   }
-  file = SD.open("test.txt");
+  file = SD.open("test.bin");
   if(file){
-    Serial.println("test.txt:");
-    Serial.write(file.read());
+    Serial.println("test.bin:");
+    Serial.println(file.read());
     file.close();
   }else{
-    Serial.println("error opening test.txt");
+    Serial.println("error opening test.bin");
   }
   
  Serial.println("SD test ended.");
  //SD test ended.
 
- file = SD.open("Logdata",FILE_WRITE);
+ file = SD.open("test.bin",FILE_WRITE);
  if(file){
     Serial.println("done");
   }else{
@@ -53,18 +57,18 @@ void setup() {
 }  
 
 void loop() {
-  if(Serial.available()){
+  if(Serial2.available()){
       for (int x=0; x <= 2; x++){
-        byte a = Serial.read();
+        Serial2.listen();
+        byte a = Serial2.read();
         byte b = a<<8;
-        byte c = Serial.read();
+        byte c = Serial2.read();
         int16_t d = b | c;
 
-        Serial.println(d);
+        Serial.write(d);
         
         if(file){
-          file.println(d);
-          file.close();
+          file.write(d);
         }
 
         if(x > 0){
@@ -108,26 +112,25 @@ void loop() {
    label:
     
      for (int y=0; y < 14; y++){
-       byte e = Serial.read();
+       byte e = Serial2.read();
        byte f = e<<56;
-       byte g = Serial.read();
+       byte g = Serial2.read();
        byte h = g<<48;
-       byte i = Serial.read();
+       byte i = Serial2.read();
        byte j = i<<40;
-       byte k = Serial.read();
+       byte k = Serial2.read();
        byte l = k<<32;
-       byte m = Serial.read();
+       byte m = Serial2.read();
        byte n = m<<24;
-       byte o = Serial.read();
+       byte o = Serial2.read();
        byte p = o<<16;
-       byte q = Serial.read();
+       byte q = Serial2.read();
        byte r = q<<8;
-       byte s = Serial.read();
+       byte s = Serial2.read();
        int64_t u = f | h | j | l | n | p | r;
 
       if(file){
-          data.println((int)u);
-          data.close();
+          file.write((int)u);
         }
        
        unsigned long curr = millis();
