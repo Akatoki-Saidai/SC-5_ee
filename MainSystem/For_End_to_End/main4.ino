@@ -47,6 +47,12 @@ double delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
 
 MPU9250_asukiaaa mySensor;
 
+#include <Wire.h> //I2C通信
+#include <Adafruit_BMP085.h>
+Adafruit_BMP085 bmp;
+#define SDA_BMP 21
+#define SCL_BMP 22
+
 //for servomoter
 #include <ESP_servo.h>
 #include <stdio.h>
