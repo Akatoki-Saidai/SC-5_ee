@@ -1,5 +1,5 @@
 a = True
-#definition
+
 file_name = "SensorData"
 
 csv_file = open(file_name+'.csv','a')
