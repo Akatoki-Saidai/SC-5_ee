@@ -31,12 +31,6 @@ int j=0;
 
 float RealDiffer;
 
-//for GPS
-#include <TinyGPS++.h>
-#include <math.h>
-
-TinyGPSPlus gps;
-
 // double GOAL_lat = 35.862857820;
 // double GOAL_lng = 139.607681275;
 // double v_initial= 38.0;  //[m/s]
