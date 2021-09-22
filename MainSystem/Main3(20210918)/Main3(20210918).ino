@@ -163,6 +163,7 @@ void setup() {
     digitalWrite(cutparac, LOW);    //切り離し用トランジスタの出力オフ
 
     //for MPU9250
+    Wire.begin(SDA_BMP, SCL_BMP);
     mySensor.beginAccel();
     mySensor.beginGyro();
     mySensor.beginMag();
@@ -180,7 +181,7 @@ void setup() {
     digitalWrite(4, moterstate);
 
     //for BMP
-    Wire.begin(SDA_BMP, SCL_BMP);
+    bmp.begin();
 
     int sensorData_d[10];
 
