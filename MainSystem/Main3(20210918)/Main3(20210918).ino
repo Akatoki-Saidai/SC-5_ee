@@ -285,7 +285,7 @@ void loop() {
                     Serial2.write("Phase1: transition completed\n");    // 地上局へのデータ送信
 
                     //LogDataの保存
-                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Phase1: transition completed");    
                     CanSatLogData.flush();
 
@@ -406,7 +406,7 @@ void loop() {
                     Serial2.write("Phase2: transition completed\n"); //地上局へのデータ送信
                     
                     //LogDataの保存
-                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Phase2: transition completed");
                     CanSatLogData.flush();
 
@@ -490,8 +490,8 @@ void loop() {
                     Serial2.write("Phase3: transition completed\n");
 
                     //LogDataの保存
-                    CanSatLogData.println(gps_time);
-                    CanSatLogData.println("Phase2: transition completed");
+                    CanSatLogData.println(currentMillis);
+                    CanSatLogData.println("Phase3: transition completed");
                     CanSatLogData.flush();
 
                     phase_state = 3;
@@ -503,7 +503,7 @@ void loop() {
                     Serial2.write("WARNING: 9v voltage is output.\n");
 
                     //LogDataの保存
-                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println(currentMillis);
                     CanSatLogData.println("9v voltage is output");
                     CanSatLogData.flush();
                     
@@ -602,8 +602,8 @@ void loop() {
                     Serial2.write("Phase4: transition completed\n");//地上局へのデータ
 
                     //LogDataの保存
-                    CanSatLogData.println(gps_time);
-                    CanSatLogData.println("\tPhase4: transition completed\n");
+                    CanSatLogData.println(currentMillis);
+                    CanSatLogData.println("Phase4: transition completed");
                     CanSatLogData.flush();
 
 
@@ -652,7 +652,7 @@ void loop() {
                     Serial2.write("Phase5: transition completed\n"); // 地上局へのデータ
 
                     //LogDataの保存
-                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Phase5: transition completed");
                     CanSatLogData.flush();
 
@@ -678,8 +678,8 @@ void loop() {
                             nowAngle1 = pos1;
                         }else if(nowAngle1 == Angle1){
                             Serial2.write("******Servo1 finished rotating***** \n");
-                            CanSatLogData.print(gps_time);
-                            CanSatLogData.print("\tServo1 finished rotating\n");
+                            CanSatLogData.println(currentMillis);
+                            CanSatLogData.println("Servo1 finished rotating");
                             CanSatLogData.flush();
                             servophase = 7;
                             }
@@ -703,8 +703,8 @@ void loop() {
                             nowAngle2 = pos2;
                         }else if(nowAngle2 == Angle2){
                             Serial2.write("******Servo2 finished rotating***** \n");
-                            CanSatLogData.print(gps_time);
-                            CanSatLogData.print("\tServo2 finished rotating\n");
+                            CanSatLogData.println(currentMillis);
+                            CanSatLogData.println("Servo2 finished rotating");
                             CanSatLogData.flush();
                             servophase = 8;
                         }
@@ -860,14 +860,16 @@ void loop() {
         sensorValue_bin[11] = gps_latitude * 1000000000;
         sensorValue_bin[12] = gps_longitude * 1000000000;
         sensorValue_bin[13] = gps_time;
-
+        
         for (int i = 0; i<14; i++) {
                 byte buf[8];
                 casttobyte64(sensorValue_bin[i],buf);
                 SensorData.write(buf,sizeof(buf));
         }
 
-
+        if (Datanumber%200 == 0){
+            SensorData.flush();
+        }
 
         }
 
