@@ -100,6 +100,7 @@ int mode_comparison = 0;
 int count1 = 0;
 int count2 = 0;
 int count3 = 0;
+double ground = 51.0;
 double altitude_average = 0;
 double altitude_sum = 0;
 double altitude_target = 100; //目標地点の高さ
@@ -416,7 +417,7 @@ void loop() {
 
                 switch (sensor){
                      case 0://BMPが使えるとき→BMPで判定(移動平均)
-                              if(altitude_average>TBD_h)
+                              if(altitude_average - ground>TBD_altitude)
                               {
                                 if(mode_average==0){//5個のデータがたまるまで
                                   alt[count1] = altitude;
@@ -448,7 +449,7 @@ void loop() {
                               break;
 
                      case 1://BMPが使えないとき→GPSで判定(移動平均)
-                              if(altitude_average>TBD_h)
+                              if(altitude_average - ground>TBD_altitude)
                               {
                                 if(mode_average==0){//5個のデータがたまるまで
                                   alt[count1] = gps_altitude;
