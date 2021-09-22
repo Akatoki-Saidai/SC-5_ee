@@ -842,10 +842,11 @@ void loop() {
             phase = 0;
             break;
 
-        Datanumber++;
+        
 
-
-        //SDカードへデータを保存する
+        }
+Datanumber++;
+    //SDカードへデータを保存する
         sensorValue_bin[0] = Temperature * 1000;
         sensorValue_bin[1] = Pressure * 1000;
         sensorValue_bin[2] = accelX * 1000;
@@ -870,8 +871,7 @@ void loop() {
         if (Datanumber%200 == 0){
             SensorData.flush();
         }
-
-        }
-
+    
+    
 }
 //loop関数の閉じ
