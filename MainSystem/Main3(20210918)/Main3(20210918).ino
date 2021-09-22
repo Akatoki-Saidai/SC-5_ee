@@ -196,6 +196,8 @@ void setup() {
 
     CanSatLogData.println("START RECORD");
     CanSatLogData.flush();
+    
+    Serial.begin(115200);
 
 }//setup関数閉じ
 
