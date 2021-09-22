@@ -121,13 +121,6 @@ double previous_altitude;
 double current_altitude;
 
 
-// Interrupt timer function
-void IRAM_ATTR onTimer1(){
-    portENTER_CRITICAL_ISR(&timerMux);
-    timeCounter1++;
-    portEXIT_CRITICAL_ISR(&timerMux);
-}
-
 
 // 64bit整数データのバイナリー変換関数
 void casttobyte64(int64_t data, byte buf[]){
