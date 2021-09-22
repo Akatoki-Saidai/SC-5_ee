@@ -13,10 +13,10 @@ void setup() {
   
   Serial.begin(115200);
   Serial2.begin(115200);
+  
   while(!Serial);
     Serial.println("Cannot mobilize this system.")
   }
-  //SD test
   Serial.println("Initializing SD card...");
 
   if(!SD.begin(4)){
@@ -25,28 +25,6 @@ void setup() {
   }else{
     Serial.println("Wirinig is corrct and card is present.");
   }
-
-  file = SD.open("test.bin",FILE_WRITE);
-
-  if(file){
-    Serial.println("Writing to test.bin...");
-    file.write("testing 1,2,3.\n");
-    file.close();
-    Serial.println("done");
-  }else{
-    Serial.println("error...");
-  }
-  file = SD.open("test.bin");
-  if(file){
-    Serial.println("test.bin:");
-    Serial.println(file.read());
-    file.close();
-  }else{
-    Serial.println("error opening test.bin");
-  }
-  
- Serial.println("SD test ended.");
- //SD test ended.
 
  file = SD.open("test.bin",FILE_WRITE);
  if(file){
@@ -58,6 +36,7 @@ void setup() {
 
 void loop() {
   if(Serial2.available()){
+   　for(int xx=0; xx>=0; xx++){
       for (int x=0; x <= 2; x++){
         Serial2.listen();
         byte a = Serial2.read();
@@ -65,7 +44,7 @@ void loop() {
         byte c = Serial2.read();
         int16_t d = b | c;
 
-        Serial.write(d);
+        Serial.write(int(d));
         
         if(file){
           file.write(d);
@@ -74,7 +53,7 @@ void loop() {
         if(x > 0){
           continue;
         }
-
+      
         switch(d){
           case 1:
            Serial.println("Phase1:transition completed.");
@@ -108,34 +87,36 @@ void loop() {
            break; 
           default:;
         }
+      }
     }
-   label:
     
+   label:
+    for(int yy=0; yy>=0; yy++)
      for (int y=0; y < 14; y++){
        byte e = Serial2.read();
-       byte f = e<<56;
+       byte f = e<<8;
        byte g = Serial2.read();
-       byte h = g<<48;
+       byte h = f|g<<8;
        byte i = Serial2.read();
-       byte j = i<<40;
+       byte j = h|i<<8;
        byte k = Serial2.read();
-       byte l = k<<32;
+       byte l = j|k<<8;
        byte m = Serial2.read();
-       byte n = m<<24;
+       byte n = l|m<<8;
        byte o = Serial2.read();
-       byte p = o<<16;
+       byte p = n|o<<8;
        byte q = Serial2.read();
-       byte r = q<<8;
+       byte r = p|q<<8;
        byte s = Serial2.read();
-       int64_t u = f | h | j | l | n | p | r;
+       int64_t t = r|s<<8;
 
       if(file){
-          file.write((int)u);
+          file.write(t);
         }
        
        unsigned long curr = millis();
        if((curr - prev) >= interval){
-         Serial.println((int)u);
+         Serial.write((int)t);
          prev = curr;
        }
        
@@ -143,6 +124,7 @@ void loop() {
       if(y > 0){
         continue;
           }
+       int u = (t,DEC);
        
       switch(u){
         case 1:

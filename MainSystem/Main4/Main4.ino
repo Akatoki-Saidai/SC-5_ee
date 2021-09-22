@@ -306,8 +306,6 @@ void loop() {
                                       altitude_sum_mpu += altitude;
                                       count1++;
                                       if(count1==5){
-                                          altitude_max = altitude_sum_mpu/5;
-                                          altitude_sum_mpu = 0;
                                           count1=0;
                                           CanSatLogData.println(currentMillis);
                                           CanSatLogData.println("FALL STARTED(by MPU)\n");    
@@ -319,7 +317,6 @@ void loop() {
                                 switch(mode_comparison){//落下開始をBMPで判定
                                   case 0:     
                                               previous_millis = millis();
-                                              altitude_sum_bmp += altitude;
                                               count3++;
                                               if(count3==5)
                                               {
@@ -360,49 +357,9 @@ void loop() {
                                               break;
                                 }
                                 break;
-                                                           
-                        case 1://MPUとBMPが共に使えないとき→落下開始をGPSで判定
-                                switch(mode_comparison){
-                                  case 0:     
-                                              previous_millis = millis();
-                                              altitude_sum_gps += gps_altitude;
-                                              count3++;
-                                              if(count3==5)
-                                              {
-                                                previous_altitude = altitude_sum_gps/5;
-                                                altitude_sum_gps = 0;
-                                                count3 = 0;
-                                                mode_comparison = 1;
-                                              }
-                                              break;
-
-                                  case 1://500ms後     
-                                              current_millis = millis();
-                                              if(current_millis - previous_millis >= 500)
-                                              {
-                                                altitude_sum_gps += gps_altitude;
-                                                count3++;
-                                                if(count3==5)
-                                                {
-                                                  current_altitude = altitude_sum_gps/5;
-                                                  if(current_altitude - previous_altitude <= -1.0)
-                                                  {
-                                                    altitude_max = current_altitude;
-                                                    Serial2.write("FALL STARTED(by GPS)\n");
-                                                    phase = 2;
-                                                  }
-                                                  else
-                                                  {
-                                                    altitude_sum_gps = 0;
-                                                    count3 = 0;
-                                                    mode_comparison = 0;
-                                                  } 
-                                                } 
-                                              }
-                                              break;
-                                }
 
                 }
+                
                 break;
 
 
@@ -453,39 +410,6 @@ void loop() {
                                 phase = 3;
                               }
                               break;
-
-                     case 1://BMPが使えないとき→GPSで判定(移動平均)
-                              if(altitude_average - ground>TBD_altitude)
-                              {
-                                if(mode_average==0){//5個のデータがたまるまで
-                                  alt[count1] = gps_altitude;
-                                  count1++;
-                                  if(count1==5){
-                                      for(count2=0;count2<5;count2++){
-                                        altitude_sum_gps += alt[count2]; // いったん受信したデータを足す
-                                      }
-                                      altitude_average = altitude_sum_gps/5;
-                                      mode_average = 1;
-                                      count1=0;
-                                  }
-                                }
-                                else{//5個のデータがたまった後
-                                      altitude_sum_gps = 0;
-                                      altitude_average = 0;
-                                      for(count2=0;count2<4;count2++){
-                                        alt[count2]=alt[count2+1];
-                                      }
-                                      alt[4]=gps_altitude;
-                                      for(count2=0;count2<5;count2++){
-                                        altitude_sum_gps += alt[count2];
-                                      }
-                                      altitude_average = altitude_sum/5;
-                                }
-                              }else{//ニクロム線に電流を流す高度以下になったら
-                                phase = 3;
-                              }
-                              break;
-                
                 }
                 break;
 
@@ -533,6 +457,7 @@ void loop() {
                         Serial2.write("WARNING: 9v voltage is stop.\n");
                         type = 2;
                     }
+                    break;
 
 
                 case 2:  //type = 2
@@ -596,7 +521,9 @@ void loop() {
                           }
                         }
                     }
+                    break;
                 }
+                break;
 
 
 
@@ -718,7 +645,7 @@ void loop() {
 
                         break;
 
-        }//フェーズ関数閉じ
+        }//サーボフェーズ関数閉じ
  
         break;
                         case 6:
@@ -799,6 +726,7 @@ void loop() {
                     else if (nowAngle2 == newAngle2){
                       Serial2.write("servo moter2 finished rotating");
                       phase = 0;
+                    
                 }
             
             currentMillis = previousMillis;
@@ -851,7 +779,7 @@ void loop() {
 
         
 
-        }
+       }
 Datanumber++;
     //SDカードへデータを保存する
         sensorValue_bin[0] = Temperature * 1000;
