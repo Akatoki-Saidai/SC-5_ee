@@ -190,7 +190,7 @@ void setup() {
 }//setup関数閉じ
 
                                                CanSatLogData.println("1");
-                                               CanSatLogData.flush();
+                                                CanSatLogData.flush();
 void loop() {
 
                                                CanSatLogData.println("2");
