@@ -456,6 +456,9 @@ void loop() {
                     if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
                         digitalWrite(cutparac, LOW); //オフ
                         Serial2.write("WARNING: 9v voltage is stop.\n");
+                        CanSatLogData.println(currentMillis);
+                        CanSatLogData.println("WARNING: 9v voltage is stop.\n");
+                        CanSatLogData.flush();
                         type = 2;
                     }
                     break;
@@ -466,6 +469,9 @@ void loop() {
                         if(type_state != 2){  //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
                             Serial2.write("Phase3_type2: transition completed\n");
                             Serial2.write("");
+                            CanSatLogData.println(currentMillis);
+                            CanSatLogData.println("Phase3_type2: transition completed\n");
+                            CanSatLogData.flush();
                             type_state = 3;
                             i = 0;
                             j = 0;
