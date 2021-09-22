@@ -180,7 +180,7 @@ void setup() {
 
 
     //for GPS
-    Serial1.begin(115200, SERIAL_8N1, 5, 18); //関数内の引数はデータ通信レート,unknown,RXピンTXピン
+    Serial1.begin(9600, SERIAL_8N1, 5, 18); //関数内の引数はデータ通信レート,unknown,RXピンTXピン
 
 
     //for servomoter
