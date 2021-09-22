@@ -162,6 +162,13 @@ void casttobyte16(int16_t data, byte buf[]){
 
 
 void setup() {
+    
+    // Interrupt
+     timer1 = timerBegin(0, 80, true);
+    timerAttachInterrupt(timer1, &onTimer1, true);
+    timerAlarmWrite(timer1, 1.0E6 / SAMPLING_RATE, true);
+    timerAlarmEnable(timer1);
+    
     // SD Card initialization
     SPI.begin(sck,miso,mosi,ss);
     SD.begin(ss,SPI);
