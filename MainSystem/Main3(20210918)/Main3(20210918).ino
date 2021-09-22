@@ -97,11 +97,6 @@ double Temperature, Pressure, accelX, accelY, accelZ = 10000, magX, magY, magZ, 
 int gps_time;
 
 
-// Interrupt timer
-volatile int timeCounter1;
-hw_timer_t *timer1 = NULL;
-portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
-
 //for phase1,2
 int sensor = 0;
 int mode_average = 0;
@@ -160,11 +155,6 @@ void casttobyte16(int16_t data, byte buf[]){
 
 
 void setup() {
-    //interrupt
-    timer1 = timerBegin(0, 80, true);
-    timerAttachInterrupt(timer1, &onTimer1, true);
-    timerAlarmWrite(timer1, 1.0E6 / SAMPLING_RATE, true);
-    timerAlarmEnable(timer1);
     
     // SD Card initialization
     SPI.begin(sck,miso,mosi,ss);
@@ -216,11 +206,6 @@ void setup() {
 
 
 void loop() {
-    //割り込み関数（適切にサンプリングレートを確立するために）
-    if (timeCounter1 > 0) {
-        portENTER_CRITICAL(&timerMux);
-        timeCounter1--;
-        portEXIT_CRITICAL(&timerMux);
 
 
         //起動時刻の更新
