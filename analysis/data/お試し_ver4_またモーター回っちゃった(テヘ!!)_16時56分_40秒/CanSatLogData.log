@@ -1,0 +1,128 @@
+START RECORD
+382
+Phase1: transition completed
+1536
+current_altitude - previous_altitude = 
+
+0.42
+2748
+current_altitude - previous_altitude = 
+
+0.15
+3964
+current_altitude - previous_altitude = 
+
+-0.05
+5175
+current_altitude - previous_altitude = 
+
+-0.07
+6392
+current_altitude - previous_altitude = 
+
+0.22
+7604
+current_altitude - previous_altitude = 
+
+0.17
+8820
+current_altitude - previous_altitude = 
+
+0.15
+10031
+current_altitude - previous_altitude = 
+
+0.07
+11248
+current_altitude - previous_altitude = 
+
+-0.33
+12460
+current_altitude - previous_altitude = 
+
+-0.07
+13681
+current_altitude - previous_altitude = 
+
+0.00
+14893
+current_altitude - previous_altitude = 
+
+0.70
+16134
+current_altitude - previous_altitude = 
+
+-0.25
+17346
+current_altitude - previous_altitude = 
+
+0.00
+18562
+current_altitude - previous_altitude = 
+
+0.28
+19773
+current_altitude - previous_altitude = 
+
+-0.07
+20990
+current_altitude - previous_altitude = 
+
+0.47
+22202
+current_altitude - previous_altitude = 
+
+-0.45
+23422
+current_altitude - previous_altitude = 
+
+0.32
+24639
+current_altitude - previous_altitude = 
+
+0.32
+25855
+current_altitude - previous_altitude = 
+
+-0.08
+27066
+current_altitude - previous_altitude = 
+
+-0.02
+28283
+current_altitude - previous_altitude = 
+
+0.08
+29495
+current_altitude - previous_altitude = 
+
+-0.20
+30711
+current_altitude - previous_altitude = 
+
+-0.20
+31948
+current_altitude - previous_altitude = 
+
+0.33
+33164
+current_altitude - previous_altitude = 
+
+0.20
+34375
+current_altitude - previous_altitude = 
+
+-0.23
+35596
+current_altitude - previous_altitude = 
+
+0.23
+36807
+current_altitude - previous_altitude = 
+
+0.12
+36957
+Phase4: transition completed
+0
+Motor start rotating
+0	Motor finished rotating
