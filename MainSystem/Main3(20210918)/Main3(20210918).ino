@@ -65,6 +65,8 @@ int nowAngle1 = 0;
 int nowAngle2 = 0;
 int Angle1 = 30;
 int Angle2 = 15;
+int newAngle1 = 0;
+int newAngle2 = 0;
 int increment = 1;
 unsigned long previousMillis = 0;
 unsigned long OnTime = 3000;
@@ -890,7 +892,6 @@ void loop() {
 
 
         }
-    }
-    //割り込み関数の閉じ
+
 }
 //loop関数の閉じ
