@@ -263,6 +263,30 @@ void loop() {
                 case '5':
                     phase = 5;
                     break;
+                    
+                case 'm':
+                    Serial2.write("****** Servo Motor1 plung angle determination mode ******\n");
+                    Serial2.write("Enter Motor Angle: ");
+                    phase = 6;
+                    break;
+
+                case 'n':
+                    Serial2.write("****** Servo Motor2 plung angle determination mode ******\n");
+                    Serial2.write("Enter Motor Angle: ");
+                    phase = 8;
+                    break;
+
+                case 'l':
+                    phase = 10;
+                    break;
+
+                case 'y':
+                    phase = 11;
+                    break;
+
+                case 'e':
+                    phase = 12;
+                    break;
             }
         }//地上局からのフェーズ指示閉じ
 
@@ -710,6 +734,133 @@ void loop() {
         }//フェーズ関数閉じ
  
         break;
+                        case 6:
+            if (Serial2.available()){
+               String key = Serial2.readStringUntil(';');
+               Serial2.write(key.c_str());
+               Serial2.write('\n');
+               newAngle1 = atoi(key.c_str());
+               Serial2.write(newAngle1);
+               phase = 7;
+            }
+            currentMillis = previousMillis;
+            break;
+
+        case 7:
+            if (nowAngle1 != newAngle1){
+               if (newAngle1 <= 180 && newAngle1 >= 0){
+                   if  ((pos1 < newAngle1) && (currentMillis - previousMillis >= interval)){
+                       previousMillis = currentMillis;
+                       pos1 += increment;
+                       servo1.write(pos1);
+                       Serial2.println(pos1);       
+                   }
+                   else if((pos1 > newAngle1) && (currentMillis - previousMillis >= interval)){
+                       previousMillis = currentMillis;
+                       pos1 -= increment;
+                       servo1.write(pos1);
+                       Serial2.println(pos1);
+                   }
+                   nowAngle1 = pos1;
+                }
+                else{
+                   Serial2.write("Warming: Out of the range \n");
+                   phase =0;
+                }
+             }
+             else if (nowAngle1 == newAngle1){
+                Serial2.write("servo moter1 finished rotating");
+                phase = 0;
+             }
+             currentMillis = previousMillis;
+             break;
+
+        case 8:
+            if (Serial2.available()){
+                String key = Serial2.readStringUntil(';');
+                Serial2.write(key.c_str());
+                Serial2.write('\n');
+                newAngle2 = atoi(key.c_str());
+                phase = 9;
+            }
+            currentMillis = previousMillis;
+            break;
+
+        case 9:
+            if (nowAngle2 != newAngle2){
+                    if (newAngle2 <= 180 && newAngle2 >= 0){
+                                currentMillis = currentMillis;
+                                if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
+                                    previousMillis = currentMillis;
+                                    pos2 += increment;
+                                    servo2.write(pos2);
+                                    Serial2.println(pos2);
+                                }
+                                else if ((pos2 > newAngle2) && (currentMillis - previousMillis >= interval)){
+                                    previousMillis = currentMillis;
+                                    pos2 -= increment;
+                                    servo2.write(pos2);
+                                    Serial2.println(pos2);
+                                }
+                                nowAngle2 = pos2;
+                        }
+                        else{
+                            Serial2.write("Warming: Out of the range\n");
+                            phase = 0;
+                        }
+                    }
+                    else if (nowAngle2 == newAngle2){
+                      Serial2.write("servo moter2 finished rotating");
+                      phase = 0;
+                }
+            
+            currentMillis = previousMillis;
+            break;
+
+         case 10:
+              Serial2.write("WARNING: The firing code has been entered.\n");
+              Serial2.write("WARNING: Are you sure you want to fire it?\n");
+              Serial2.write("WARNING: Press the y key to allow firing.\n");
+              prelaunch = true;
+              phase = 0;
+              break;
+
+         case 11:
+              if(prelaunch){
+                if(ignitionstate){
+                  if(currentMillis - previousMillis >= launch_outputsecond * 1000){
+                    Serial2.write("LAUCHING: 9V voltage is stop.\n");
+                    digitalWrite(launch_PIN, LOW); //オフ
+                    ignitionstate = 0;
+                    countdown = 3;
+                    prelaunch = false;
+                    phase = 0;
+                  }
+                }
+                else if(currentMillis - previousMillis >= 1000){
+                  char c_countdown = '0' + countdown;
+                  Serial2.write("COUNTDOWN: ");
+                  Serial2.write(c_countdown);
+                  Serial2.write("\n");
+                  --countdown;
+                  if(countdown+1<=0){
+                    Serial2.write("LAUCHING: 9V voltage is output.\n");
+                    digitalWrite(launch_PIN, HIGH); //オン
+                    ignitionstate = true;
+                  }
+                  previousMillis = currentMillis;
+                }
+              }
+              break;
+
+        case 12:
+            prelaunch = false;
+            digitalWrite(launch_PIN, LOW);
+            ignitionstate = 0;
+            countdown = 3;
+            Serial2.write("WARNING: The EMERGENCY code has been entered\n");
+            phase = 0;
+            break;
 
         Datanumber++;
 
