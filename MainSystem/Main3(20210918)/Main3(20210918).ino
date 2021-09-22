@@ -179,10 +179,6 @@ void setup() {
     mySensor.magZOffset = -10;
 
 
-    //for GPS
-    Serial1.begin(9600, SERIAL_8N1, 5, 18); //関数内の引数はデータ通信レート,unknown,RXピンTXピン
-
-
     //for servomoter
     servo1.init(23,0);
     servo2.init(19,1);
@@ -196,8 +192,6 @@ void setup() {
 
     CanSatLogData.println("START RECORD");
     CanSatLogData.flush();
-    
-    Serial.begin(115200);
 
 }//setup関数閉じ
 
@@ -228,19 +222,6 @@ void loop() {
         gyroZ = mySensor.gyroZ();
         altitude = bmp.readAltitude();
         accelSqrt = mySensor.accelSqrt();
-
-        // GPSデータの更新をするかどうか
-        if(gps.location.isUpdated()){   //アップデートの実行
-            char c = Serial1.read();    //GPSチップからのデータを受信
-            gps.encode(c);              //GPSチップからのデータの整形
-
-            gps_latitude = gps.location.lat();
-            gps_longitude = gps.location.lng();
-            gps_altitude = gps.altitude.meters();
-            gps_time = gps.time.value();
-
-        }
-
 
         //地上局からのフェーズ指示
         if(Serial2.available()){
