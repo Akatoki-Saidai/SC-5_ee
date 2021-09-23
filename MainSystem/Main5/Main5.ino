@@ -66,8 +66,9 @@ unsigned long OnTime = 3000;
 unsigned long OffTime = 5000;
 int moterstate = LOW;
 int interval = 30;
-int servophase = 6;
+int servophase = 1;
 int moter_end = 0;
+int servophase_state = 1;
 
 
 
@@ -519,8 +520,9 @@ void loop() {
                     CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Phase4: transition completed");
                     CanSatLogData.flush();
-
-
+                    
+                    previousMillis = currentMillis;
+                    
                     phase_state = 4;
                 }
 
@@ -532,7 +534,7 @@ void loop() {
                     previousMillis = currentMillis;
                     Serial.write("Moter start rotating \n");
 
-                    CanSatLogData.println(gps_time);
+                    CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Motor start rotating");
                     CanSatLogData.flush();
 
@@ -543,7 +545,7 @@ void loop() {
                     previousMillis = currentMillis;
                     Serial.write("Moter finished rotating \n");
 
-                    CanSatLogData.print(gps_time);
+                    CanSatLogData.print(currentMillis);
                     CanSatLogData.print("\tMotor finished rotating\n");
                     CanSatLogData.flush();
 
@@ -576,7 +578,17 @@ void loop() {
 
                 switch(servophase){
 
-                    case 6:
+                    case 1:
+                        if(servophase_state != 1){
+                            Serial.write("Phase5: transition completed\n"); // 地上局へのデータ
+
+                            //LogDataの保存
+                            CanSatLogData.println(currentMillis);
+                            CanSatLogData.println("Servo1 started rotating \n");
+                            CanSatLogData.flush();
+
+                            servophase_state = 1;
+                        }
                         if(nowAngle1 != Angle1){
                             if((pos1 < Angle1) && (currentMillis - previousMillis >= interval)) {
                                 previousMillis = currentMillis;
@@ -595,13 +607,27 @@ void loop() {
                             CanSatLogData.println(currentMillis);
                             CanSatLogData.println("Servo1 finished rotating");
                             CanSatLogData.flush();
-                            servophase = 7;
+                            servophase = 2;
                             }
                         break;
 
+                    case 2:
+                        if(currentMillis - previousMillis >= 1000){
+                            previousMillis = currentMillis;
+                            servophase = 3;
+                        }
 
+                    case 3:
+                        if(servophase_state != 2){
+                            Serial.write("Phase5: transition completed\n"); // 地上局へのデータ
 
-                    case 7:
+                            //LogDataの保存
+                            CanSatLogData.println(currentMillis);
+                            CanSatLogData.println("Servo2 started rotating \n");
+                            CanSatLogData.flush();
+
+                            servophase_state = 2;
+                        }
                         if(nowAngle2 != Angle2){
                             if((pos2 < Angle2) && (currentMillis - previousMillis >= interval)) {
                                 previousMillis = currentMillis;
