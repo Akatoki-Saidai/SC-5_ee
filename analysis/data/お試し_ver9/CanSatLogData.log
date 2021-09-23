@@ -1,0 +1,22 @@
+START RECORD
+343
+Phase3: transition completed
+343
+9v voltage is output
+5375
+WARNING: 9v voltage is stop.
+
+5475
+Phase3_type2: transition completed
+
+6017
+Phase4: transition completed
+0
+Motor start rotating
+0	Motor finished rotating
+14169
+Phase5: transition completed
+16462
+Servo1 finished rotating
+17688
+Servo2 finished rotating
