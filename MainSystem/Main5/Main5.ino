@@ -16,13 +16,12 @@ int Datanumber = 0;
 //phase3で使用する変数
 int type = 1;
 int yeah = 1;
-int type_state = 1;
+int type_state = 0;
 int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
 int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
 float time3_1,St_Time;      //時間に関するもの
 float Accel[6];             //計測した値をおいておく関数
 float Altitude[6];          //(高度)
-float Asum;
 float Preac,differ1,Acsum,Acave,RealDiffer1;
 float Preal,differ2,Alsum,Alave,RealDiffer2;
 int i=0;
@@ -422,11 +421,7 @@ void loop() {
                     if(type_state != 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
                         Serial.write("Phase3_type1: transition completed\n");
                         Serial.write("");
-                        type_state = 2;
-
-                        Serial.write("WARNING: The cut-para code has been entered.\n");
-                        digitalWrite(cutparac, HIGH); //オン
-                        Serial.write("WARNING: 9v voltage is output.\n");
+                        type_state = 1;
                     }
 
                     if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
@@ -441,17 +436,18 @@ void loop() {
 
 
                 case 2:  //type = 2
-                    if (mySensor.accelUpdate() == 0) {
+                    
                         if(type_state != 2){  //停止フェーズに入ったとき１回だけ実行したいプログラムを書く
                             Serial.write("Phase3_type2: transition completed\n");
                             Serial.write("");
                             CanSatLogData.println(currentMillis);
                             CanSatLogData.println("Phase3_type2: transition completed\n");
                             CanSatLogData.flush();
-                            type_state = 3;
+                            type_state = 2;
                             i = 0;
                             j = 0;
-                            Preac = 0;         //1秒前の加速度を記憶
+                            Preac = 0;         //1個前の加速度を記憶
+                            Preal = 0;
                             differ1 = 0.1;     //加速度　移動平均の差
                             differ2 = 0.5;     //高度　　移動平均の差
                             Acave = 0;         //加速度　5個の平均値
@@ -492,9 +488,11 @@ void loop() {
                           if(i == 5){
                             i = 0;
                             Acsum = 0; 
-                            Asum = 0;
+                            Alsum = 0;
                           }else{
                             i = i+1;
+                            Acsum = 0; 
+                            Alsum = 0;
                           }
 
                           if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
@@ -503,8 +501,7 @@ void loop() {
                             phase = 4;
                           }
                         }
-                    }
-                    break;
+                        break;
                 }
                 break;
 
