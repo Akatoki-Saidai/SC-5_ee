@@ -1,4 +1,4 @@
-int phase = 3;
+int phase = 1;
 char key = '0';
 
 int phase_state = 0;
@@ -293,6 +293,7 @@ void loop() {
                                 switch(mode_comparison){//落下開始をBMPで判定
                                   case 0:     
                                               previous_millis = millis();
+                                              altitude_sum_bmp += altitude;
                                               count3++;
                                               if(count3==5)
                                               {
