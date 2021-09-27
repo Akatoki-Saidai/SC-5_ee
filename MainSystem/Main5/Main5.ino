@@ -17,11 +17,11 @@ int Datanumber = 0;
 int type = 1;
 int yeah = 1;
 int type_state = 0;
-int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
-int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
-float time3_1,St_Time;      //時間に関するもの
-float Accel[6];             //計測した値をおいておく関数
-float Altitude[6];          //(高度)
+int cutparac = 32;                  //切り離し用トランジスタのピン番号の宣言
+int outputcutsecond = 5;            //切り離し時の9V電圧を流す時間，単位はsecond
+float time3_1,time3_2,St_Time;      //時間に関するもの
+float Accel[6];                     //計測した値をおいておく関数
+float Altitude[6];                  //(高度)
 float Preac,differ1,Acsum,Acave,RealDiffer1;
 float Preal,differ2,Alsum,Alave,RealDiffer2;
 int i=0;
@@ -473,6 +473,7 @@ void loop() {
                                }
                                Acave = Acsum/5;
                                Alave = Alave/5;
+                               time3_2 = currentMillis;
                           }
                         }else{
                           Preac = Acave;
@@ -496,11 +497,12 @@ void loop() {
                             Acsum = 0; 
                             Alsum = 0;
                           }
-
-                          if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
-                            phase = 4;
-                          }else if( RealDiffer2 < differ2 ){
-                            phase = 4;
+                          if(currentMillis - time3_2 > 1000){
+                            if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
+                              phase = 4;
+                            }else if( RealDiffer2 < differ2 ){
+                              phase = 4;
+                            }
                           }
                         }
                         break;
