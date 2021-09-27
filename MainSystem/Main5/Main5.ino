@@ -500,8 +500,10 @@ void loop() {
                           if(currentMillis - time3_2 > 1000){
                             if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
                               phase = 4;
-                            }else if( RealDiffer2 < differ2 ){
+                            }else( RealDiffer2 < differ2 ){
                               phase = 4;
+                            }else{
+                              time3_2 = currentMillis;
                             }
                           }
                         }
