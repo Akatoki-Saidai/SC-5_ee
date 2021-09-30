@@ -1,0 +1,77 @@
+START RECORD
+333
+Phase1: transition completed
+START RECORD
+135
+Phase1: transition completed
+START RECORD
+448
+Phase1: transition completed
+START RECORD
+135
+Phase1: transition completed
+1287
+current_altitude - previous_altitude = 
+
+67.04
+2498
+current_altitude - previous_altitude = 
+
+67.36
+3715
+current_altitude - previous_altitude = 
+
+66.79
+4927
+current_altitude - previous_altitude = 
+
+67.37
+6143
+current_altitude - previous_altitude = 
+
+67.69
+7354
+current_altitude - previous_altitude = 
+
+68.70
+8571
+current_altitude - previous_altitude = 
+
+67.34
+9787
+current_altitude - previous_altitude = 
+
+67.62
+11004
+current_altitude - previous_altitude = 
+
+68.96
+11533
+FALL STARTED(by MPU)
+
+11632
+Phase2: transition completed
+26600
+Phase3: transition completed
+26600
+9v voltage is output
+31655
+WARNING: 9v voltage is stop.
+
+31740
+Phase3_type2: transition completed
+
+33263
+Phase4: transition completed
+38283
+Motor start rotating
+41328	Motor finished rotating
+46455
+Phase5: transition completed
+48749
+Servo1 finished rotating
+48834
+Servo2 starting rotating 
+
+49979
+Servo2 finished rotating
