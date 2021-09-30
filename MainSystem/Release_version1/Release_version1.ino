@@ -1,10 +1,7 @@
-int phase = 1;
+int phase = 3;
 char key = '0';
-const int SAMPLING_RATE = 200;
-int phase_state = 0;
 
-int Angle1 = 30;
-int Angle2 = 15;
+int phase_state = 0;
 
 int launch_PIN = 33;            //トランジスタのピン番号の宣言
 int launch_outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
@@ -30,7 +27,14 @@ float Preal,differ2,Alsum,Alave,RealDiffer2;
 int i=0;
 int j=0;
 
+
 float RealDiffer;
+
+// double GOAL_lat = 35.862857820;
+// double GOAL_lng = 139.607681275;
+// double v_initial= 38.0;  //[m/s]
+// double gravity        = 9.80665;  //[m/s/s]
+// double delta_lng,GPS_lat,GPS_lng,distance,angle_radian,angle_degree;
 
 //for MPU9250
 #include <MPU9250_asukiaaa.h>
@@ -52,7 +56,8 @@ int pos1 = 0;
 int pos2 = 0;
 int nowAngle1 = 0;
 int nowAngle2 = 0;
-
+int Angle1 = 30;
+int Angle2 = 15;
 int newAngle1 = 0;
 int newAngle2 = 0;
 int increment = 1;
@@ -84,11 +89,12 @@ File SensorData;
 const int sck=13 , miso=15 , mosi=14 , ss=27;
 
 //センサー値の格納
-double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt = 0, gps_latitude, gps_longitude, gps_altitude, altitude = 0;
+double Temperature, Pressure, accelX, accelY, accelZ = 0, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt = 0, gps_latitude, gps_longitude, gps_altitude, altitude = 0;
 int gps_time;
 
 
 //for phase1,2
+int sensor = 0;
 int mode_average = 0;
 int mode_comparison = 0;
 int count1 = 0;
@@ -97,8 +103,11 @@ int count3 = 0;
 double ground = 51.0;
 double altitude_average = 0;
 double altitude_sum = 0;
+double altitude_target = 100; //目標地点の高さ
 double altitude_max; //目標地点の海抜高さ(BMPで測定)
+double TBD_accel = 0.15;
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
+double TBD_h = altitude_max - altitude_target + TBD_altitude; //ニクロム線に電流を流し始める海抜高度
 double alt[5];
 unsigned long current_millis;
 unsigned long previous_millis;
@@ -108,9 +117,7 @@ double altitude_sum_gps = 0;
 double previous_altitude;
 double current_altitude;
 
-volatile int timeCounter1;
-hw_timer_t *timer1 = NULL;
-portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+
 
 // 64bit整数データのバイナリー変換関数
 void casttobyte64(int64_t data, byte buf[]){
@@ -131,12 +138,9 @@ void casttobyte16(int16_t data, byte buf[]){
     buf[1] = (data) & 0x00FF;
 }
 
-// Interrupt timer function
-void IRAM_ATTR onTimer1(){
-  portENTER_CRITICAL_ISR(&timerMux);
-  timeCounter1++;
-  portEXIT_CRITICAL_ISR(&timerMux);
-}
+
+
+
 
 
 
@@ -148,11 +152,6 @@ void setup() {
     CanSatLogData = SD.open("/CanSatLogData.log", FILE_APPEND);
     SensorData = SD.open("/SensorData.bin",FILE_APPEND);
 
-    //割り込み関数
-    timer1 = timerBegin(0, 80, true);
-    timerAttachInterrupt(timer1, &onTimer1, true);
-    timerAlarmWrite(timer1, 1.0E6 / SAMPLING_RATE, true);
-    timerAlarmEnable(timer1);
     //無線通信
     Serial.begin(115200, SERIAL_8N1, 16, 17); //関数内の引数はデータ通信レート，unknown，RXピン，TXピン
     Serial.write("TESTING: Serial communication\n");
@@ -185,6 +184,8 @@ void setup() {
     //for BMP
     bmp.begin();
 
+    int sensorData_d[10];
+
     CanSatLogData.println("START RECORD");
     CanSatLogData.flush();
 
@@ -192,10 +193,7 @@ void setup() {
 
 
 void loop() {
-    if (timeCounter1 > 0) {
-    portENTER_CRITICAL(&timerMux);
-    timeCounter1--;
-    portEXIT_CRITICAL(&timerMux);
+
 
         //起動時刻の更新
         unsigned long currentMillis = millis();
@@ -267,60 +265,77 @@ void loop() {
                     CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Phase1: transition completed");    
                     CanSatLogData.flush();
+
+                    if(altitude == 0 && accelSqrt == 0 && accelZ == 0) //センサーチェック
+                    {
+                       sensor = 1;
+                    }
                     
                     phase_state = 1;
                 }
            
+                switch (sensor){
+                        case 0://MPUとBMPの両方，もしくはどちらか一方が使えるとき
 
-                if(accelZ > 0){//落下開始をMPUで判定
-                    altitude_sum_mpu += altitude;
-                    count1++;
-                    if(count1==1){
-                        count1=0;
-                        CanSatLogData.println(currentMillis);
-                        CanSatLogData.println("FALL STARTED(by MPU)\n");    
-                        CanSatLogData.flush();
-                        phase = 2;
-                    }
+                                if(accelZ > 0) //落下開始をMPUで判定
+                                {
+                                      altitude_sum_mpu += altitude;
+                                      count1++;
+                                      if(count1==1){
+                                          count1=0;
+                                          CanSatLogData.println(currentMillis);
+                                          CanSatLogData.println("FALL STARTED(by MPU)\n");    
+                                          CanSatLogData.flush();
+                                          phase = 2;
+                                      }
+                                }
+
+                                switch(mode_comparison){//落下開始をBMPで判定
+                                  case 0:     
+                                              previous_millis = millis();
+                                              count3++;
+                                              if(count3==5)
+                                              {
+                                                previous_altitude = altitude_sum_bmp/5;
+                                                altitude_sum_bmp = 0;
+                                                count3 = 0;
+                                                mode_comparison = 1;
+                                              }
+                                              break;
+
+                                  case 1://500ms後     
+                                              current_millis = millis();
+                                              if(current_millis - previous_millis >= 500)
+                                              {
+                                                altitude_sum_bmp += altitude;
+                                                count3++;
+                                                if(count3==5)
+                                                {
+                                                  current_altitude = altitude_sum_bmp/5;
+                                                  CanSatLogData.println(currentMillis);
+                                                  CanSatLogData.println("current_altitude - previous_altitude = \n");  
+                                                  CanSatLogData.println(current_altitude - previous_altitude);  
+                                                  if(current_altitude - previous_altitude <= -1.0)
+                                                  {
+                                                    altitude_max = current_altitude;
+                                                    CanSatLogData.println("FALL STARTED(by BMP)\n");                                                      
+                                                    CanSatLogData.flush();
+                                                    phase = 2;
+                                                  }
+                                                  else
+                                                  {
+                                                    altitude_sum_bmp = 0;
+                                                    count3 = 0;
+                                                    mode_comparison = 0;
+                                                  } 
+                                                } 
+                                              }
+                                              break;
+                                }
+                                break;
+
                 }
-
-                switch(mode_comparison){//落下開始をBMPで判定
-                    case 0:     
-                        previous_millis = millis();
-                        count3++;
-                        if(count3==5){
-                            previous_altitude = altitude_sum_bmp/5;
-                            altitude_sum_bmp = 0;
-                            count3 = 0;
-                            mode_comparison = 1;
-                        }
-                        break;
-
-                    case 1://500ms後     
-                        current_millis = millis();
-                        if(current_millis - previous_millis >= 500){
-                            altitude_sum_bmp += altitude;
-                            count3++;
-                            if(count3==5){
-                                current_altitude = altitude_sum_bmp/5;
-                                CanSatLogData.println(currentMillis);
-                                CanSatLogData.println("current_altitude - previous_altitude = \n");  
-                                CanSatLogData.println(current_altitude - previous_altitude);  
-                                if(current_altitude - previous_altitude <= -1.0){
-                                    altitude_max = current_altitude;
-                                    CanSatLogData.println("FALL STARTED(by BMP)\n");                                                      
-                                    CanSatLogData.flush();
-                                    phase = 2;
-                                }else{
-                                    altitude_sum_bmp = 0;
-                                    count3 = 0;
-                                    mode_comparison = 0;
-                                } 
-                            } 
-                        }
-                        break;
-
-                }
+                
                 break;
 
 
@@ -334,37 +349,45 @@ void loop() {
                     CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Phase2: transition completed");
                     CanSatLogData.flush();
+
+
                     phase_state = 2;
                 }
 
-                if(altitude_average - ground>TBD_altitude){
-                    if(mode_average==0){//5個のデータがたまるまで
-                        alt[count1] = altitude;
-                        count1++;
-                        if(count1==5){
-                            for(count2=0;count2<5;count2++){
-                                altitude_sum_bmp += alt[count2]; // いったん受信したデータを足す
-                            }
-                            altitude_average = altitude_sum_bmp/5;
-                            mode_average = 1;
-                            count1=0;
-                        }
-                    }else{//5個のデータがたまった後
-                        altitude_sum_bmp = 0;
-                        altitude_average = 0;
-                        for(count2=0;count2<4;count2++){
-                            alt[count2]=alt[count2+1];
-                        }
-                        alt[4]=altitude;
-                        for(count2=0;count2<5;count2++){
-                            altitude_sum_bmp += alt[count2];
-                        }
-                        altitude_average = altitude_sum_bmp/5;
-                    }
-                }else{//ニクロム線に電流を流す高度以下になったら
-                    phase = 3;
+                switch (sensor){
+                     case 0://BMPが使えるとき→BMPで判定(移動平均)
+                              if(altitude_average - ground>TBD_altitude)
+                              {
+                                if(mode_average==0){//5個のデータがたまるまで
+                                  alt[count1] = altitude;
+                                  count1++;
+                                  if(count1==5){
+                                      for(count2=0;count2<5;count2++){
+                                        altitude_sum_bmp += alt[count2]; // いったん受信したデータを足す
+                                      }
+                                      altitude_average = altitude_sum_bmp/5;
+                                      mode_average = 1;
+                                      count1=0;
+                                  }
+                                }
+                                else{//5個のデータがたまった後
+                                      altitude_sum_bmp = 0;
+                                      altitude_average = 0;
+                                      for(count2=0;count2<4;count2++){
+                                        alt[count2]=alt[count2+1];
+                                      }
+                                      alt[4]=altitude;
+                                      for(count2=0;count2<5;count2++){
+                                        altitude_sum_bmp += alt[count2];
+                                      }
+                                      altitude_average = altitude_sum_bmp/5;
+                                }
+                              }else{//ニクロム線に電流を流す高度以下になったら
+                                phase = 3;
+                              }
+                              break;
                 }
-            break;
+                break;
 
 
             //########## 分離フェーズ ##########
@@ -377,6 +400,7 @@ void loop() {
                     CanSatLogData.println(currentMillis);
                     CanSatLogData.println("Phase3: transition completed");
                     CanSatLogData.flush();
+
 
                     phase_state = 3;
                     time3_1 = currentMillis;                           //phase3　開始時間の保存
@@ -394,12 +418,12 @@ void loop() {
                 }
 
                 switch(type){
-                    case 1:
-                        if(type_state != 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
-                            Serial.write("Phase3_type1: transition completed\n");
-                            Serial.write("");
-                            type_state = 1;
-                        }
+                case 1:
+                    if(type_state != 1){     //電流フェーズに入ったとき１回だけ実行したいプログラムを書く
+                        Serial.write("Phase3_type1: transition completed\n");
+                        Serial.write("");
+                        type_state = 1;
+                    }
 
                     if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
                         digitalWrite(cutparac, LOW); //オフ
@@ -660,6 +684,6 @@ Datanumber++;
             SensorData.flush();
         }
     
-        }
+    
 }
 //loop関数の閉じ
