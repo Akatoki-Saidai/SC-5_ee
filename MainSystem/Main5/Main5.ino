@@ -133,9 +133,9 @@ void casttobyte16(int16_t data, byte buf[]){
 
 // Interrupt timer function
 void IRAM_ATTR onTimer1(){
-  portENTER_CRITICAL_ISR(&timerMux);
-  timeCounter1++;
-  portEXIT_CRITICAL_ISR(&timerMux);
+    portENTER_CRITICAL_ISR(&timerMux);
+    timeCounter1++;
+    portEXIT_CRITICAL_ISR(&timerMux);
 }
 
 
@@ -556,11 +556,11 @@ void loop() {
 
                     case 1:
                         if(servophase_state != 1){
-                            Serial.write("Phase5: transition completed\n"); // 地上局へのデータ
+                            Serial.write("servophase1: Servo1 starting rotating\n"); // 地上局へのデータ
 
                             //LogDataの保存
                             CanSatLogData.println(currentMillis);
-                            CanSatLogData.println("Servo1 started rotating \n");
+                            CanSatLogData.println("Servo1 starting rotating \n");
                             CanSatLogData.flush();
 
                             servophase_state = 1;
@@ -584,7 +584,7 @@ void loop() {
                             CanSatLogData.println("Servo1 finished rotating");
                             CanSatLogData.flush();
                             servophase = 2;
-                            }
+                        }
                         break;
 
                     case 2:
@@ -595,11 +595,11 @@ void loop() {
 
                     case 3:
                         if(servophase_state != 2){
-                            Serial.write("Phase5: transition completed\n"); // 地上局へのデータ
+                            Serial.write("servophase3: Servo2 starting rotating\n"); // 地上局へのデータ
 
                             //LogDataの保存
                             CanSatLogData.println(currentMillis);
-                            CanSatLogData.println("Servo2 started rotating \n");
+                            CanSatLogData.println("Servo2 starting rotating \n");
                             CanSatLogData.flush();
 
                             servophase_state = 2;
@@ -624,17 +624,16 @@ void loop() {
                             CanSatLogData.flush();
                             servophase = 8;
                         }
-
                         break;
 
-        }//サーボフェーズ関数閉じ
- 
-        break;
+                }//サーボフェーズ関数閉じ
+                break;
 
 
-       }
-Datanumber++;
-    //SDカードへデータを保存する
+        }
+    
+        Datanumber++;
+        //SDカードへデータを保存する
         sensorValue_bin[0] = Temperature * 1000;
         sensorValue_bin[1] = Pressure * 1000;
         sensorValue_bin[2] = accelX * 1000;
@@ -660,6 +659,5 @@ Datanumber++;
             SensorData.flush();
         }
     
-        }
-}
-//loop関数の閉じ
+    }
+}//loop関数の閉じ
