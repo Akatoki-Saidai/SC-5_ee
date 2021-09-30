@@ -101,7 +101,7 @@ int count1 = 0;
 int count2 = 0;
 int count3 = 0;
 double ground = 51.0;
-double altitude_average = 0;
+double altitude_average = 10000;
 double altitude_sum = 0;
 double altitude_target = 100; //目標地点の高さ
 double altitude_max; //目標地点の海抜高さ(BMPで測定)
@@ -277,7 +277,7 @@ void loop() {
                 switch (sensor){
                         case 0://MPUとBMPの両方，もしくはどちらか一方が使えるとき
 
-                                if(accelZ > 0) //落下開始をMPUで判定
+                                if(accelZ < -2.0) //落下開始をMPUで判定
                                 {
                                       altitude_sum_mpu += altitude;
                                       count1++;
@@ -500,7 +500,7 @@ void loop() {
                           if(currentMillis - time3_2 > 1000){
                             if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
                               phase = 4;
-                            }else( RealDiffer2 < differ2 ){
+                            }else if( RealDiffer2 < differ2 ){
                               phase = 4;
                             }else{
                               time3_2 = currentMillis;
