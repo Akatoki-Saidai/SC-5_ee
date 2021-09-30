@@ -250,7 +250,7 @@ void loop() {
                     phase = 6;
                     break;
                 
-                case 'e'
+                case 'e':
                     phase = 7;
                     break;
             }
@@ -278,7 +278,7 @@ void loop() {
                     phase_state = 1;
                 }
 
-                if(accelZ > 0){//落下開始をMPUで判定
+                if(accelZ < -2){//落下開始をMPUで判定
                     altitude_sum_mpu += altitude;
                     count1++;
                     if(count1==1){
@@ -293,6 +293,7 @@ void loop() {
                 switch(mode_comparison){//落下開始をBMPで判定
                     case 0:     
                         previous_millis = millis();
+                        altitude_sum_bmp += altitude;
                         count3++;
                         if(count3==5){
                             previous_altitude = altitude_sum_bmp/5;
@@ -641,6 +642,7 @@ void loop() {
                         break;
                     
                     default:
+                        break;
 
                 }//サーボフェーズ関数閉じ
                 break;
