@@ -20,11 +20,11 @@ int Datanumber = 0;
 int type = 1;
 int yeah = 1;
 int type_state = 0;
-int cutparac = 32;          //切り離し用トランジスタのピン番号の宣言
-int outputcutsecond = 5;    //切り離し時の9V電圧を流す時間，単位はsecond
-float time3_1,St_Time;      //時間に関するもの
-float Accel[6];             //計測した値をおいておく関数
-float Altitude[6];          //(高度)
+int cutparac = 32;                  //切り離し用トランジスタのピン番号の宣言
+int outputcutsecond = 5;            //切り離し時の9V電圧を流す時間，単位はsecond
+float time3_1,time3_2,St_Time;      //時間に関するもの
+float Accel[6];                     //計測した値をおいておく関数
+float Altitude[6];                  //(高度)
 float Preac,differ1,Acsum,Acave,RealDiffer1;
 float Preal,differ2,Alsum,Alave,RealDiffer2;
 int i=0;
@@ -95,7 +95,7 @@ int count1 = 0;
 int count2 = 0;
 int count3 = 0;
 double ground = 51.0;
-double altitude_average = 0;
+double altitude_average = 10000;
 double altitude_sum = 0;
 double altitude_max; //目標地点の海抜高さ(BMPで測定)
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
@@ -270,7 +270,6 @@ void loop() {
                     
                     phase_state = 1;
                 }
-           
 
                 if(accelZ > 0){//落下開始をMPUで判定
                     altitude_sum_mpu += altitude;
@@ -319,7 +318,6 @@ void loop() {
                             } 
                         }
                         break;
-
                 }
                 break;
 
@@ -401,15 +399,15 @@ void loop() {
                             type_state = 1;
                         }
 
-                    if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
-                        digitalWrite(cutparac, LOW); //オフ
-                        Serial.write("WARNING: 9v voltage is stop.\n");
-                        CanSatLogData.println(currentMillis);
-                        CanSatLogData.println("WARNING: 9v voltage is stop.\n");
-                        CanSatLogData.flush();
-                        type = 2;
-                    }
-                    break;
+                        if(currentMillis > St_Time){     //電流を流した時間が基準時間を超えたら
+                            digitalWrite(cutparac, LOW); //オフ
+                            Serial.write("WARNING: 9v voltage is stop.\n");
+                            CanSatLogData.println(currentMillis);
+                            CanSatLogData.println("WARNING: 9v voltage is stop.\n");
+                            CanSatLogData.flush();
+                            type = 2;
+                        }
+                        break;
 
 
                 case 2:  //type = 2
@@ -436,47 +434,51 @@ void loop() {
                         }
 
                         if(yeah == 1){     //データを初めから五個得るまで
-                          Accel[i] = accelSqrt;
-                          Altitude[i] = altitude;
-                          i = i + 1;
-                          if(i == 6){        //5個得たらその時点での平均値を出し，次のフェーズへ
-                               yeah = 2;
-                               i = 0; //iの値をリセット
-                               for(j=1 ; j<6 ; j++){   //j=0の値は非常に誤差が大きいので1から
-                                Acsum = Acsum + Accel[j];  
-                                Alsum = Alsum + Altitude[j];
-                               }
-                               Acave = Acsum/5;
-                               Alave = Alave/5;
-                          }
+                            Accel[i] = accelSqrt;
+                            Altitude[i] = altitude;
+                            i = i + 1;
+                            if(i == 6){        //5個得たらその時点での平均値を出し，次のフェーズへ
+                                yeah = 2;
+                                i = 0; //iの値をリセット
+                                for(j=1 ; j<6 ; j++){   //j=0の値は非常に誤差が大きいので1から
+                                    Acsum = Acsum + Accel[j];  
+                                    Alsum = Alsum + Altitude[j];
+                                }
+                                Acave = Acsum/5;
+                                Alave = Alave/5;
+                                time3_2 = currentMillis;
+                            }
                         }else{
-                          Preac = Acave;
-                          Preal = Alave;  
-                          Accel[i] = accelSqrt;
-                          Altitude[i] = altitude;
-                          for(j=0 ; j<5 ; j++){
-                            Acsum = Acsum + Accel[j];
-                            Alsum = Alsum + Altitude[j];
-                          }
-                          Acave = Acsum/5;
-                          Alave = Alsum/5;
-                          RealDiffer1 = Preac - Acave;
-                          RealDiffer2 = Preal - Alave;
-                          if(i == 5){
-                            i = 0;
-                            Acsum = 0; 
-                            Alsum = 0;
-                          }else{
-                            i = i+1;
-                            Acsum = 0; 
-                            Alsum = 0;
-                          }
-
-                          if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
-                            phase = 4;
-                          }else if( RealDiffer2 < differ2 ){
-                            phase = 4;
-                          }
+                            Preac = Acave;
+                            Preal = Alave;  
+                            Accel[i] = accelSqrt;
+                            Altitude[i] = altitude;
+                            for(j=0 ; j<5 ; j++){
+                                Acsum = Acsum + Accel[j];
+                                Alsum = Alsum + Altitude[j];
+                            }
+                            Acave = Acsum/5;
+                            Alave = Alsum/5;
+                            RealDiffer1 = Preac - Acave;
+                            RealDiffer2 = Preal - Alave;
+                            if(i == 5){
+                                i = 0;
+                                Acsum = 0; 
+                                Alsum = 0;
+                            }else{
+                                i = i+1;
+                                Acsum = 0; 
+                                Alsum = 0;
+                            }
+                            if(currentMillis - time3_2 > 1000){
+                                if( RealDiffer1 < differ1 ){ //移動平均が基準以内の変化量だった時
+                                    phase = 4;
+                                }else if( RealDiffer2 < differ2 ){
+                                    phase = 4;
+                                }else{
+                                    time3_2 = currentMillis;
+                                }
+                            }
                         }
                         break;
                 }
@@ -514,8 +516,7 @@ void loop() {
                     CanSatLogData.println("Motor start rotating");
                     CanSatLogData.flush();
 
-                    digitalWrite(4,moterstate);
-
+                    digitalWrite(4,moterstate);\\モーターを動かしている
                 }else if((moterstate == HIGH) && (moter_end == 0) && (currentMillis - previousMillis >= OnTime)){
                     moterstate = LOW;
                     previousMillis = currentMillis;
@@ -527,8 +528,7 @@ void loop() {
 
                     digitalWrite(4,moterstate);
                     moter_end = 1;
-                }
-                else if((moterstate == LOW) && (moter_end == 1) && (currentMillis - previousMillis >= OffTime)){
+                }else if((moterstate == LOW) && (moter_end == 1) && (currentMillis - previousMillis >= OffTime)){
                     previousMillis = currentMillis;
                     phase = 5;
                 }
