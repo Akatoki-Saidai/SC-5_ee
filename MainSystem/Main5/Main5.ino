@@ -97,7 +97,6 @@ int count3 = 0;
 double ground = 51.0;
 double altitude_average = 10000;
 double altitude_sum = 0;
-double altitude_max; //目標地点の海抜高さ(BMPで測定)
 double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
 double alt[5];
 unsigned long current_millis;
@@ -314,7 +313,6 @@ void loop() {
                                 CanSatLogData.println("current_altitude - previous_altitude = \n");  
                                 CanSatLogData.println(current_altitude - previous_altitude);  
                                 if(current_altitude - previous_altitude <= -1.0){
-                                    altitude_max = current_altitude;
                                     CanSatLogData.println("FALL STARTED(by BMP)\n");                                                      
                                     CanSatLogData.flush();
                                     phase = 2;
@@ -524,7 +522,7 @@ void loop() {
                     CanSatLogData.println("Motor start rotating");
                     CanSatLogData.flush();
 
-                    digitalWrite(4,moterstate);\\モーターを動かしている
+                    digitalWrite(4,moterstate);//モーターを動かしている
                 }else if((moterstate == HIGH) && (moter_end == 0) && (currentMillis - previousMillis >= OnTime)){
                     moterstate = LOW;
                     previousMillis = currentMillis;
