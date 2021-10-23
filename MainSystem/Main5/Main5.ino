@@ -208,17 +208,28 @@ void loop() {
         //センサー値取得
         Temperature = bmp.readTemperature();
         Pressure = bmp.readPressure();
-        accelX = mySensor.accelX();
-        accelY = mySensor.accelY();
-        accelZ = mySensor.accelZ();
-        magX = mySensor.magX();
-        magY = mySensor.magY();
-        magZ = mySensor.magZ();
-        gyroX = mySensor.gyroX();
-        gyroY = mySensor.gyroY();
-        gyroZ = mySensor.gyroZ();
+
+        if (mySensor.accelUpdate() == 0) {
+            accelX = mySensor.accelX();
+            accelY = mySensor.accelY();
+            accelZ = mySensor.accelZ();
+            accelSqrt = mySensor.accelSqrt();
+        }
+
+        if (mySensor.magUpdate() == 0) {
+            magX = mySensor.magX();
+            magY = mySensor.magY();
+            magZ = mySensor.magZ();
+        }
+
+        if (mySensor.gyroUpdate() == 0) {
+            gyroX = mySensor.gyroX();
+            gyroY = mySensor.gyroY();
+            gyroZ = mySensor.gyroZ();
+        }
+
         altitude = bmp.readAltitude();
-        accelSqrt = mySensor.accelSqrt();
+        
 
         //地上局からのフェーズ指示
         if(Serial2.available()){
