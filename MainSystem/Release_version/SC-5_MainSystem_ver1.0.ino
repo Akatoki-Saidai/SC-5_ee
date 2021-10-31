@@ -1,10 +1,10 @@
-int phase = 1;
+int phase = 0;
 char key = '0';
 const int SAMPLING_RATE = 200;
 int phase_state = 0;
 
-int Angle1 = 30;
-int Angle2 = 15;
+int Angle1 = 75;
+int Angle2 = 0;
 
 int launch_PIN = 33;            //トランジスタのピン番号の宣言
 int launch_outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
@@ -237,6 +237,10 @@ void loop() {
             char key = Serial2.read();
 
             switch(key){
+                case '0':
+                    phase = 0;
+                    break;
+
                 case '1':
                     phase = 1;
                     break;
@@ -273,6 +277,95 @@ void loop() {
 
         //各フェーズごとの記述
         switch (phase){
+            case 0:
+                if(phase_state != 1){
+                    //待機フェーズに入ったとき１回だけ実行したいプログラムを書く
+                    Serial2.write("Phase0: transition completed\n");    // 地上局へのデータ送信
+
+                    //LogDataの保存
+                    CanSatLogData.println(currentMillis);
+                    CanSatLogData.println("Phase0: transition completed");    
+                    CanSatLogData.flush();
+                    
+                    phase_state = 0;
+
+                    //リセット処理
+                        int phase = 0;
+                        char key = '0';
+                        int phase_state = 0;
+
+                        int Angle1 = 75;
+                        int Angle2 = 0;
+
+                        int launch_PIN = 33;            //トランジスタのピン番号の宣言
+                        int launch_outputsecond = 5;       //点火時の9V電圧を流す時間，単位はsecond
+
+                        bool prelaunch = false;
+                        int countdown = 3;
+                        int ignitionstate = false;
+
+                        //phase3で使用する変数
+                        int type = 1;
+                        int yeah = 1;
+                        int type_state = 0;
+                        int cutparac = 32;                  //切り離し用トランジスタのピン番号の宣言
+                        int outputcutsecond = 5;            //切り離し時の9V電圧を流す時間，単位はsecond
+                        float time3_1,time3_2,St_Time;      //時間に関するもの
+                        float Accel[6];                     //計測した値をおいておく関数
+                        float Altitude[6];                  //(高度)
+                        float Preac,differ1,Acsum,Acave,RealDiffer1;
+                        float Preal,differ2,Alsum,Alave,RealDiffer2;
+                        int i=0;
+                        int j=0;
+
+                        float RealDiffer;
+
+                        int pos1 = 0;
+                        int pos2 = 0;
+                        int nowAngle1 = 0;
+                        int nowAngle2 = 0;
+
+                        int newAngle1 = 0;
+                        int newAngle2 = 0;
+                        int increment = 1;
+                        unsigned long previousMillis = 0;
+                        unsigned long OnTime = 2000;
+                        unsigned long OffTime = 5000;
+                        int moterstate = LOW;
+                        int interval = 30;
+                        int servophase = 1;
+                        int moter_end = 0;
+                        int servophase_state = 1;
+
+
+
+                        //for BMP180
+
+                        //センサー値の格納
+                        double Temperature, Pressure, accelX, accelY, accelZ, magX, magY, magZ, gyroX, gyroY, gyroZ, accelSqrt = 0, gps_latitude, gps_longitude, gps_altitude, altitude = 0;
+                        int gps_time;
+
+                        //for phase1,2
+                        int mode_average = 0;
+                        int mode_comparison = 0;
+                        int count1 = 0;
+                        int count2 = 0;
+                        int count3 = 0;
+                        double ground = 51.0;
+                        double altitude_average = 10000;
+                        double altitude_sum = 0;
+                        double TBD_altitude = 7; //終端速度3[m\s]*切断にかかる時間2[s]+パラシュートがcansatにかぶらないで分離できる高度1[m]
+                        double alt[5];
+                        unsigned long current_millis;
+                        unsigned long previous_millis;
+                        double altitude_sum_mpu = 0;
+                        double altitude_sum_bmp = 0;
+                        double altitude_sum_gps = 0;
+                        double previous_altitude;
+                        double current_altitude;
+
+                }
+                break;
 
             //########## 待機フェーズ ##########
             case 1:
@@ -693,8 +786,6 @@ void loop() {
                 Serial2.write("WARNING: The EMERGENCY code has been entered\n");
                 phase = 0;
                 break;
-
-
 
         }
     
