@@ -20,5 +20,3 @@ def caculate(init_velocity, degree):
 	height = init_velocity*math.sin(theta)*time - 0.5 *g * time**2
 	plt.plot(time,height)
 	plt.show()
-
-caculate(41.25)

@@ -1,0 +1,138 @@
+START RECORD
+3605450
+Phase1: transition completed
+3606650
+current_altitude - previous_altitude = 
+
+0.25
+3607915
+current_altitude - previous_altitude = 
+
+-0.33
+3609197
+current_altitude - previous_altitude = 
+
+0.31
+3610462
+current_altitude - previous_altitude = 
+
+0.18
+3611725
+current_altitude - previous_altitude = 
+
+0.02
+3612994
+current_altitude - previous_altitude = 
+
+-0.12
+3614256
+current_altitude - previous_altitude = 
+
+0.28
+3615521
+current_altitude - previous_altitude = 
+
+-0.23
+3616784
+current_altitude - previous_altitude = 
+
+-0.02
+3618054
+current_altitude - previous_altitude = 
+
+-0.20
+3619317
+current_altitude - previous_altitude = 
+
+-0.17
+3620582
+current_altitude - previous_altitude = 
+
+-0.10
+3621844
+current_altitude - previous_altitude = 
+
+-3.77
+FALL STARTED(by BMP)
+
+3621946
+Phase2: transition completed
+3622434
+Phase3: transition completed
+3622434
+9v voltage is output
+3627435
+WARNING: 9v voltage is stop.
+
+3627527
+Phase3_type2: transition completed
+
+3629036
+Phase4: transition completed
+3634111
+Motor start rotating
+3636178	Motor finished rotating
+3641269
+Phase5: transition completed
+START RECORD
+46705
+Phase2: transition completed
+47203
+Phase3: transition completed
+47203
+9v voltage is output
+52210
+WARNING: 9v voltage is stop.
+
+52297
+Phase3_type2: transition completed
+
+53806
+Phase4: transition completed
+58870
+Motor start rotating
+60934	Motor finished rotating
+66089
+Phase5: transition completed
+START RECORD
+9592
+Phase2: transition completed
+10081
+Phase3: transition completed
+10081
+9v voltage is output
+15155
+WARNING: 9v voltage is stop.
+
+15242
+Phase3_type2: transition completed
+
+16761
+Phase4: transition completed
+21825
+Motor start rotating
+23889	Motor finished rotating
+29035
+Phase5: transition completed
+START RECORD
+65567
+Phase5: transition completed
+START RECORD
+7115
+Phase3: transition completed
+7115
+9v voltage is output
+12189
+WARNING: 9v voltage is stop.
+
+12276
+Phase3_type2: transition completed
+
+13786
+Phase4: transition completed
+18800
+Motor start rotating
+20865	Motor finished rotating
+26008
+Phase5: transition completed
+START RECORD

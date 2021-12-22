@@ -78,7 +78,7 @@ void loop(){
                     int newAngle1 = atoi(key.c_str());
                     if (nowAngle1 != newAngle1){
                         if(newAngle1 <= 180 && newAngle1 >= 0){
-                            Serial2.write("WARMING: MORER1 IS ROTATING \n");
+                            Serial2.write("WARMING: MOTER1 IS ROTATING \n");
                             while (pos1 != newAngle1){
                                 currentMillis = millis();
                                 if((pos1 < newAngle1) && (currentMillis - previousMillis >= interval)){
@@ -117,7 +117,7 @@ void loop(){
                     int newAngle2 = atoi(key.c_str());
                     if (nowAngle2 != newAngle2){
                       if (newAngle2 <= 180 && newAngle2 >= 0){
-                        Serial2.write("WARMING: MORER1 IS ROTATING \n");
+                        Serial2.write("WARMING: MOTER1 IS ROTATING \n");
                         while (pos2 != newAngle2){
                           currentMillis = millis();
                           if ((pos2 < newAngle2) && (currentMillis - previousMillis >= interval)){
@@ -149,7 +149,7 @@ void loop(){
                     if(currentMillis - previousMillis >= launch_outputsecond * 1000){
                         Serial2.write("LAUCHING: 9V voltage is stop.\n");
                         digitalWrite(launch_PIN, LOW); //オフ
-                        ignitionstate = 0;
+                        ignitionstate = false;
                         countdown = 3;
                         prelaunch = false;
                         key = '0';
@@ -173,7 +173,7 @@ void loop(){
         case 'e':
             prelaunch = false;
             digitalWrite(launch_PIN, LOW);
-            ignitionstate = 0;
+            ignitionstate = false;
             countdown = 3;
             Serial2.write("WARNING: The EMERGENCY code has been entered\n");
             key = '0';
